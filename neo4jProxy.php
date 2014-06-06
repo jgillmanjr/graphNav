@@ -23,14 +23,26 @@
 
 		if(!in_array($startId, $usedNodeIds)) // vis.js doesn't like duplicate arrays, so don't add them if already in there
 		{
-			$returnArray[nodes][] = array('id' => $startId, 'label' => $startNode->getProperty('name'));
+			foreach($startNode->getProperties() as $property => $value)
+			{
+				$title .= "<b>$property:</b> $value <br>";
+			}
+
+			$returnArray[nodes][] = array('id' => $startId, 'label' => $startNode->getProperty('name'), 'title' => $title);
 			$usedNodeIds[] = $startId;
+			unset($title);
 		}
 
 		if(!in_array($endId, $usedNodeIds))
 		{
-			$returnArray[nodes][] = array('id' => $endId, 'label' => $endNode->getProperty('name'));
+			foreach($endNode->getProperties() as $property => $value)
+			{
+				$title .= "<b>$property:</b> $value <br>";
+			}
+
+			$returnArray[nodes][] = array('id' => $endId, 'label' => $endNode->getProperty('name'), 'title' => $title);
 			$usedNodeIds[] = $endId;
+			unset($title);
 		}
 
 		if(!in_array($relationId, $usedRelationIds)) // More than one identical relation doesn't break vis.js, but it doubles up the connections (though it does look kind of neat)
