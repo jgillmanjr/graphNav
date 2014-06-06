@@ -9,10 +9,13 @@ var container = document.getElementById('bigBoard');
 var options =
 	{
 		width: '1280px',
-		height: '1024px'
+		height: '1024px',
+		dataManipulation:
+		{
+			enabled: true
+		}
 	};
 var data = {};
-var relDebug = []; // Debugging, remove this when done
 
 $.ajax('neo4jProxy.php',
 		{
