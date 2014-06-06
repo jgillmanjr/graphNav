@@ -4,15 +4,18 @@
  */
 
 // Setup graph stuff
-//var container = $('#bigBoard').get(); // Figure out how to get this to work with jQuery selects
-var container = document.getElementById('bigBoard');
+var container = $('#bigBoard').get(0);
 var options =
 	{
 		width: '1280px',
 		height: '1024px',
 		dataManipulation:
 		{
-			enabled: true
+			enabled: true,
+			onAdd: function(data, callback)
+			{
+
+			},
 		}
 	};
 var data = {};
