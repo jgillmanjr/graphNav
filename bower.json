@@ -1,0 +1,23 @@
+{
+  "name": "graphNav",
+  "authors":
+  [
+    "Jason Gillman Jr. <jason@rrfaae.com>"
+  ],
+  "description": "A graphical utility to navigate and work with Neo4j databases",
+  "license": "GPL",
+  "homepage": "https://github.com/jgillmanjr/graphNav",
+  "dependencies":
+  {
+    "vis": "~1.0.2",
+    "jquery": "~2.1.1"
+  },
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
