@@ -5,21 +5,33 @@
 
 // Setup graph stuff
 var container = $('#bigBoard').get(0);
+//var container = document.getElementById('bigBoard');
+
+var data = {};
+//var data = {nodes: [], edges: []};
+
 var options =
 	{
 		width: '1280px',
 		height: '1024px',
-		dataManipulation:
+		dataManipulation: true,
+		onAdd: function(data, callback)
 		{
-			enabled: true,
-			onAdd: function(data, callback)
-			{
+			 data.id = 3;
+			 data.label = "Three";
 
-			},
+			 var newData = {};
+			 newData.id = 3;
+			 newData.label = "three";
+			 callback(data);
 		}
 	};
-var data = {};
 
+/**
+ *
+ * Load data from Neo4j
+ *
+ */
 $.ajax('neo4jProxy.php',
 		{
 			type: 'GET',
@@ -35,4 +47,3 @@ $.ajax('neo4jProxy.php',
 	);
 
 var graph = new vis.Graph(container, data, options);
-
