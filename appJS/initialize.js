@@ -22,6 +22,10 @@ var options =
 		onAdd: function(data, callback)
 		{
 			 newNode();
+		},
+		onConnect: function(data, callback)
+		{
+			newRelation(data);
 		}
 	};
 

@@ -15,7 +15,7 @@
 		$usedRelationIds = array(); // Initialize
 		$returnArray['nodes'] = array(); // Initialize
 		$returnArray['edges'] = array(); // Initialize
-		
+
 		foreach($result as $row)
 		{
 			$startId = $row['startId'];
@@ -46,7 +46,7 @@
 				unset($title);
 			}
 
-			if(is_a($relation,'Neo4j\Relationship'))
+			if(is_a($relation,'Everyman\Neo4j\Relationship'))
 			{
 				if(!in_array($endId, $usedNodeIds))
 				{
@@ -64,14 +64,14 @@
 						$label = (string)$endId;
 					}
 
-					$returnArray['nodes'][] = array('id' => $endId, 'label' => $endNode->getProperty('name'), 'title' => $title, 'properties' => $endNode->getProperties());
+					$returnArray['nodes'][] = array('id' => $endId, 'label' => $label, 'title' => $title, 'properties' => $endNode->getProperties());
 					$usedNodeIds[] = $endId;
 					unset($title);
 				}
 
 				if(!in_array($relationId, $usedRelationIds)) // More than one identical relation doesn't break vis.js, but it doubles up the connections (though it does look kind of neat)
 				{
-					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'id' => $relationId);
+					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'id' => $relationId, 'title' => $relation->getType());
 					$usedRelationIds[] = $relationId;
 				}
 			}
@@ -102,6 +102,24 @@
 			$title .= "<b>$property:</b> $value <br>";
 		}
 		$returnArray['title'] = $title;
+
+		echo json_encode($returnArray);
+	}
+
+	if($_GET['action'] == 'addRelation')
+	{
+		$relationData = json_decode($_POST['relationData'], TRUE);
+
+		$startNode = $neo4jClient->getNode($relationData['from']);
+		$endNode = $neo4jClient->getNode($relationData['to']);
+		$relation = $neo4jClient->makeRelationship();
+
+		$relation->setStartNode($startNode)->setEndNode($endNode)->setType($relationData['type'])->save();
+
+		$returnArray['from'] = $relationData['from'];
+		$returnArray['to'] = $relationData['to'];
+		$returnArray['id'] = $relation->getId();
+		$returnArray['title'] = $relationData['type'];
 
 		echo json_encode($returnArray);
 	}

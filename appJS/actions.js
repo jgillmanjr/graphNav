@@ -67,3 +67,77 @@ function newNode()
  * End Node Related Functions
  *
  */
+
+/**
+ *
+ * Relation Related Functions
+ *
+ */
+
+function clearRelationPopup()
+{
+	$('#relationPopup').dialog("destroy");
+	$('#relationPopup').empty();
+}
+
+function createRelation(workingData)
+{
+	// Create the relation in Neo4j
+	$.ajax('neo4jProxy.php?action=addRelation',
+		{
+			type: 'POST',
+			async: true,
+			dataType:	'json',
+			data:
+				{
+					relationData: JSON.stringify(workingData)
+				},
+			success:
+				function(returnData, textStatus, jqXHR)
+				{
+					data.edges.add(returnData);
+				}
+		}
+	);
+
+	clearRelationPopup();
+}
+
+function newRelation(workingData)
+{
+	var relationPopDialog = $('#relationPopup').dialog(
+		{
+			dialogClass: "no-close",
+			height: 300,
+			width: 600,
+			title: "Create New Relation",
+			buttons:
+			[
+				{
+					text: "Save",
+					click: function()
+						{
+							workingData.type = $('#relationTypeField').val();
+							createRelation(workingData);
+						}
+				},
+				{
+					text: "Cancel",
+					click: function()
+						{
+							clearRelationPopup();
+						}
+				}
+			]
+		}
+	);
+
+	$(relationPopDialog).append('<span>Making relation from node ID ' + workingData.from + ' to node ID ' + workingData.to + '</span><br />');
+	$(relationPopDialog).append('<span id="relationType">Relation Type: <input type="text" id="relationTypeField" /></span><br />');
+}
+
+/**
+ *
+ * End Relation Related Functions
+ *
+ */
