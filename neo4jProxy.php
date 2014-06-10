@@ -13,6 +13,9 @@
 
 		$usedNodeIds = array(); // Initialize
 		$usedRelationIds = array(); // Initialize
+		$returnArray['nodes'] = array(); // Initialize
+		$returnArray['edges'] = array(); // Initialize
+		
 		foreach($result as $row)
 		{
 			$startId = $row['startId'];
@@ -38,7 +41,7 @@
 					$label = (string)$startId; // Apparently, vis.js doesn't like it if the label is not a string
 				}
 
-				$returnArray[nodes][] = array('id' => $startId, 'label' => $label, 'title' => $title, 'properties' => $startNode->getProperties());
+				$returnArray['nodes'][] = array('id' => $startId, 'label' => $label, 'title' => $title, 'properties' => $startNode->getProperties());
 				$usedNodeIds[] = $startId;
 				unset($title);
 			}
@@ -61,14 +64,14 @@
 						$label = (string)$endId;
 					}
 
-					$returnArray[nodes][] = array('id' => $endId, 'label' => $endNode->getProperty('name'), 'title' => $title, 'properties' => $endNode->getProperties());
+					$returnArray['nodes'][] = array('id' => $endId, 'label' => $endNode->getProperty('name'), 'title' => $title, 'properties' => $endNode->getProperties());
 					$usedNodeIds[] = $endId;
 					unset($title);
 				}
 
 				if(!in_array($relationId, $usedRelationIds)) // More than one identical relation doesn't break vis.js, but it doubles up the connections (though it does look kind of neat)
 				{
-					$returnArray[edges][] = array('from' => $startId, 'to' => $endId, 'id' => $relationId);
+					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'id' => $relationId);
 					$usedRelationIds[] = $relationId;
 				}
 			}
