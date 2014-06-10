@@ -1,12 +1,27 @@
 <html>
 	<head>
 		<title>graphNav</title>
+
 		<script src="bower_components/vis/dist/vis.min.js"></script>
 		<script src="bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="appJS/nodeActions.js"></script>
+
 		<link href="bower_components/vis/dist/vis.min.css" rel="stylesheet" type="text/css" />
+		<link href="graphNav.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
 		<div id="bigBoard"></div>
-		<script src="appJS/main.js"></script>
+		<script src="appJS/initialize.js"></script>
+
+		<div id="nodePopup">
+			<span id="nodeOperation">Node Operation</span><br />
+			<span id="nodeId">Node ID: <input type="text" id="nodeIdField" /></span><br />
+			<div id="nodeProps">
+				<span id="nodePropsHeader">Node Properties</span><br />
+				<input id="addPropButton" type="button" value="Add Property" onclick="addNodeProperty();" /><br />
+			</div>
+			<input type="button" value="Save" id="saveNodeButton" onclick="createNode();">
+			<input type="button" value="Cancel" id="cancelNodeButton" onclick="clearNodePopup();">
+		</div>
 	</body>
 </html>
