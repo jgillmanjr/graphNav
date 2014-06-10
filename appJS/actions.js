@@ -1,11 +1,11 @@
 /**
- * Node Editing Code
+ * Action Code
  * Jason Gillman Jr. <jason@rrfaae.com>
  */
 
 /**
  *
- * Node Adding / Editing Related Functions
+ * Node Related Functions
  *
  */
 
