@@ -10,6 +10,7 @@ Getting Started
 ### Requirements
 
 graphNav relies on a few things. These are:
+
 1. **PHP** - Used to talk to the Neo4j database via the use of Josh Adell's [Neo4jPHP](https://github.com/jadell/neo4jphp/) library
 1. **Composer** - Handles installing the Neo4jPHP library automagically (more or less)
 1. **Bower** - Handles dependency installation for the front end (JavaScript) libraries (vis.js, jQuery, and jQuery-UI)
