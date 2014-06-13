@@ -71,7 +71,12 @@
 
 				if(!in_array($relationId, $usedRelationIds)) // More than one identical relation doesn't break vis.js, but it doubles up the connections (though it does look kind of neat)
 				{
-					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'label' => $relation->getType(), 'id' => $relationId, 'title' => $relation->getType());
+					foreach($relation->getProperties() as $property => $value)
+					{
+						$title .= "<b>$property:</b> $value <br>";
+					}
+
+					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'label' => $relation->getType(), 'id' => $relationId, 'title' => $title, 'properties' => $relation->getProperties());
 					$usedRelationIds[] = $relationId;
 				}
 			}
