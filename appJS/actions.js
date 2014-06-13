@@ -9,15 +9,10 @@
  *
  */
 
-function addNodeProperty()
-{
-	$('#nodeProps').append('<span class="nodeProperty" id="prop">Name:<input type="text" class="propertyLabel" /> Value:<input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-}
-
 function clearNodePopup()
 {
-	$('#nodePopup').hide();
-	$('.nodeProperty').remove();
+	$('#nodePopup').dialog("destroy");
+	$('#nodePopup').empty();
 }
 
 function createNode()
@@ -56,10 +51,41 @@ function createNode()
 
 function newNode()
 {
-	$('#nodePopup').show();
-	$('#nodeOperation').text('Create New Node');
-	$('#nodeId').hide();
-	$('#nodeProps').append('<span class="nodeProperty" id="prop">Name:<input type="text" class="propertyLabel" /> Value:<input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+	var nodePopDialog = $('#nodePopup').dialog(
+		{
+			dialogClass: "no-close",
+			height: 300,
+			width: 600,
+			title: "Create New Node",
+			buttons:
+			[
+				{
+					text: "Add Property",
+					click: function()
+						{
+							$(nodePopDialog).append('<span class="nodeProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+						}
+				},
+				{
+					text: "Save",
+					click: function()
+						{
+							createNode();
+						}
+				},
+				{
+					text: "Cancel",
+					click: function()
+						{
+							clearNodePopup();
+						}
+				}
+			]
+		}
+	);
+
+	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />')
+	$(nodePopDialog).append('<span class="nodeProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
 
 /**
