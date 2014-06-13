@@ -114,10 +114,31 @@ function newRelation(workingData)
 			buttons:
 			[
 				{
+					text: "Add Property",
+					click: function()
+						{
+							$(relationPopDialog).append('<span class="relationProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+						}
+				},
+				{
 					text: "Save",
 					click: function()
 						{
 							workingData.type = $('#relationTypeField').val();
+
+							// Get the properties
+							var relProperties = new Object()
+							$('.relationProperty').each(
+								function()
+								{
+									pLabel = $(this).find('.propertyLabel').val();
+									pValue = $(this).find('.propertyValue').val();
+									relProperties[pLabel] = pValue;
+								}
+							);
+
+							workingData.properties = relProperties;
+
 							createRelation(workingData);
 						}
 				},
@@ -132,8 +153,10 @@ function newRelation(workingData)
 		}
 	);
 
-	$(relationPopDialog).append('<span>Making relation from node ID ' + workingData.from + ' to node ID ' + workingData.to + '</span><br />');
-	$(relationPopDialog).append('<span id="relationType">Relation Type: <input type="text" id="relationTypeField" /></span><br />');
+	$(relationPopDialog).append('<span>Making relation from node ID ' + workingData.from + ' to node ID ' + workingData.to + '</span><br /><br />');
+	$(relationPopDialog).append('<span id="relationType">Relation Type: <input type="text" id="relationTypeField" /></span><br /><br />');
+	$(relationPopDialog).append('<span id="relationPropsHeader">Relation Properties</span><br />')
+	$(relationPopDialog).append('<span class="relationProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
 
 /**

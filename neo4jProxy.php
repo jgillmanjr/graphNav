@@ -114,12 +114,19 @@
 		$endNode = $neo4jClient->getNode($relationData['to']);
 		$relation = $neo4jClient->makeRelationship();
 
-		$relation->setStartNode($startNode)->setEndNode($endNode)->setType($relationData['type'])->save();
+		$relation->setStartNode($startNode)->setEndNode($endNode)->setType($relationData['type'])->setProperties($relationData['properties'])->save();
 
-		$returnArray['from'] = $relationData['from'];
-		$returnArray['to'] = $relationData['to'];
-		$returnArray['id'] = $relation->getId();
-		$returnArray['title'] = $relationData['type'];
+		foreach($relationData['properties'] as $property => $value)
+		{
+			$title .= "<b>$property:</b> $value <br>";
+		}
+
+		$returnArray['from']		= 	$relationData['from'];
+		$returnArray['to']			= 	$relationData['to'];
+		$returnArray['id']			= 	$relation->getId();
+		$returnArray['label']		=	$relation->getType();
+		$returnArray['title']		= 	$title;
+		$returnArray['properties']	= 	$relationData['properties'];
 
 		echo json_encode($returnArray);
 	}

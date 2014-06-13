@@ -21,7 +21,22 @@
 	font-size: 28px;
 }
 
+#relationPopup
+{
+	text-align:	center;
+}
+
 .no-close .ui-dialog-titlebar-close
 {
   display: none;
+}
+
+.propertyLabel
+{
+	width:	200px;
+}
+
+.propertyValue
+{
+	width:	200px;
 }
