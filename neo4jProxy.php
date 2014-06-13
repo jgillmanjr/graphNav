@@ -16,7 +16,8 @@
 			{
 				foreach($neo4jObject->getLabels() as $neo4jLabel)
 				{
-					$title .= "$neo4jLabel<br />";
+					//$title .= $neo4jLabel . "<br />"; <-- I have a pull request in that will allow this to be used
+					$title .= $neo4jLabel->getName() . "<br />";
 				}
 			}
 
