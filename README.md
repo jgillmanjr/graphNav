@@ -29,10 +29,4 @@ To Do
 
 This project is in its infancy. There is much to do and to be fixed.
 
-1. **Node Related Functionality**
-	1. Edit
-	1. Delete
-	1. Label Support
-1. **Relation Related Functionality**
-	1. Edit
-	1. Delete
+Take a look at the [To Do List](https://github.com/jgillmanjr/graphNav/issues/2).
