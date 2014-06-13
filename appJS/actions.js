@@ -165,7 +165,14 @@ function newRelation(workingData)
 
 							workingData.properties = relProperties;
 
-							createRelation(workingData);
+							if(workingData.type == "")
+							{
+								alert("You must specify a relation type.");
+							}
+							else
+							{
+								createRelation(workingData);
+							}
 						}
 				},
 				{
