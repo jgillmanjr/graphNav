@@ -27,7 +27,16 @@ function createNode()
 			nodeProperties[pLabel] = pValue;
 		}
 	);
-	
+
+	// Get the labels
+	var nodeLabels = new Array();
+	$('.nodeLabel').each(
+		function()
+		{
+			nodeLabels.push($(this).find('.labelValue').val());
+		}
+	);
+
 	// Create the node in Neo4j
 	$.ajax('neo4jProxy.php?action=addNode',
 		{
@@ -36,7 +45,8 @@ function createNode()
 			dataType:	'json',
 			data:
 				{
-					nodeProperties: JSON.stringify(nodeProperties)
+					nodeProperties: JSON.stringify(nodeProperties),
+					nodeLabels:		JSON.stringify(nodeLabels)
 				},
 			success:
 				function(returnData, textStatus, jqXHR)
@@ -60,10 +70,17 @@ function newNode()
 			buttons:
 			[
 				{
+					text: "Add Label",
+					click: function()
+						{
+							$('#nodePropsHeader').before('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>'); // So it goes before the property header
+						}
+				},
+				{
 					text: "Add Property",
 					click: function()
 						{
-							$(nodePopDialog).append('<span class="nodeProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+							$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 						}
 				},
 				{
@@ -84,8 +101,10 @@ function newNode()
 		}
 	);
 
-	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />')
-	$(nodePopDialog).append('<span class="nodeProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+	$(nodePopDialog).append('<span id="nodeLabelHeader">Node Labels</span><br />');
+	$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />');
+	$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
 
 /**
@@ -143,7 +162,7 @@ function newRelation(workingData)
 					text: "Add Property",
 					click: function()
 						{
-							$(relationPopDialog).append('<span class="relationProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+							$(relationPopDialog).append('<span class="relationProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 						}
 				},
 				{
@@ -188,8 +207,8 @@ function newRelation(workingData)
 
 	$(relationPopDialog).append('<span>Making relation from node ID ' + workingData.from + ' to node ID ' + workingData.to + '</span><br /><br />');
 	$(relationPopDialog).append('<span id="relationType">Relation Type: <input type="text" id="relationTypeField" /></span><br /><br />');
-	$(relationPopDialog).append('<span id="relationPropsHeader">Relation Properties</span><br />')
-	$(relationPopDialog).append('<span class="relationProperty" id="prop">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+	$(relationPopDialog).append('<span id="relationPropsHeader">Relation Properties</span><br />');
+	$(relationPopDialog).append('<span class="relationProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
 
 /**

@@ -130,9 +130,19 @@
 	if($_GET['action'] == 'addNode')
 	{
 		$nodeProperties = json_decode($_POST['nodeProperties'], TRUE);
+		$nodeLabels = json_decode($_POST['nodeLabels'], TRUE);
 
 		$newNode = $neo4jClient->makeNode();
 		$newNode->setProperties($nodeProperties)->save();
+
+		if(count($nodeLabels) > 0)
+		{
+			foreach($nodeLabels as $label)
+			{
+				$labelsArray[] = $neo4jClient->makeLabel($label);
+			}
+			$newNode->addLabels($labelsArray);
+		}
 
 		$returnArray = genReturnData($newNode);
 
