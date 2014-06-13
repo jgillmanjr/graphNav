@@ -3,6 +3,55 @@
 	require('vendor/autoload.php');
 	use Everyman\Neo4j;
 
+	function generateTitle(Everyman\Neo4j\PropertyContainer $neo4jObject)
+	{
+		if(is_a($neo4jObject,'Everyman\Neo4j\Node')) // Dealing with a node object
+		{
+			$title .= "<b>Labels</b><br />";
+			if(count($neo4jObject->getLabels()) == 0)
+			{
+				$title .= "Node has no labels<br />";
+			}
+			else // We have labels
+			{
+				foreach($neo4jObject->getLabels() as $neo4jLabel)
+				{
+					$title .= "$neo4jLabel<br />";
+				}
+			}
+
+			$title .= "<br /><b>Properties</b><br />";
+			if(count($neo4jObject->getProperties()) == 0)
+			{
+				$title .= "Node has no properties<br />";
+			}
+			else // Node has properties
+			{
+				foreach($neo4jObject->getProperties() as $property => $value)
+				{
+					$title .= "<b>$property:</b> $value <br />";
+				}
+			}
+		}
+		else // Dealing with a relationship object
+		{
+			$title .= "<b>Properties</b><br />";
+			if(count($neo4jObject->getProperties()) == 0)
+			{
+				$title .= "Relation has no properties<br />";
+			}
+			else // Node has properties
+			{
+				foreach($neo4jObject->getProperties() as $property => $value)
+				{
+					$title .= "<b>$property:</b> $value <br />";
+				}
+			}
+		}
+
+		return $title;
+	}
+
 	$neo4jClient = new Neo4j\Client($host, $port);
 
 	if($_GET['action'] == 'retrieveAll') // Get ALL the nodes and relations, and then return them JSON style for consumption by graphNav
@@ -27,11 +76,6 @@
 
 			if(!in_array($startId, $usedNodeIds)) // vis.js doesn't like duplicate arrays, so don't add them if already in there
 			{
-				foreach($startNode->getProperties() as $property => $value)
-				{
-					$title .= "<b>$property:</b> $value <br>";
-				}
-
 				if(isset($startNode->getProperties()['name']))
 				{
 					$label = $startNode->getProperty('name');
@@ -41,7 +85,7 @@
 					$label = (string)$startId; // Apparently, vis.js doesn't like it if the label is not a string
 				}
 
-				$returnArray['nodes'][] = array('id' => $startId, 'label' => $label, 'title' => $title, 'properties' => $startNode->getProperties());
+				$returnArray['nodes'][] = array('id' => $startId, 'label' => $label, 'title' => generateTitle($startNode), 'properties' => $startNode->getProperties());
 				$usedNodeIds[] = $startId;
 				unset($title);
 			}
@@ -50,11 +94,6 @@
 			{
 				if(!in_array($endId, $usedNodeIds))
 				{
-					foreach($endNode->getProperties() as $property => $value)
-					{
-						$title .= "<b>$property:</b> $value <br>";
-					}
-
 					if(isset($endNode->getProperties()['name']))
 					{
 						$label = $endNode->getProperty('name');
@@ -64,20 +103,16 @@
 						$label = (string)$endId;
 					}
 
-					$returnArray['nodes'][] = array('id' => $endId, 'label' => $label, 'title' => $title, 'properties' => $endNode->getProperties());
+					$returnArray['nodes'][] = array('id' => $endId, 'label' => $label, 'title' => generateTitle($endNode), 'properties' => $endNode->getProperties());
 					$usedNodeIds[] = $endId;
 					unset($title);
 				}
 
 				if(!in_array($relationId, $usedRelationIds)) // More than one identical relation doesn't break vis.js, but it doubles up the connections (though it does look kind of neat)
 				{
-					foreach($relation->getProperties() as $property => $value)
-					{
-						$title .= "<b>$property:</b> $value <br>";
-					}
-
-					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'label' => $relation->getType(), 'id' => $relationId, 'title' => $title, 'properties' => $relation->getProperties());
+					$returnArray['edges'][] = array('from' => $startId, 'to' => $endId, 'label' => $relation->getType(), 'id' => $relationId, 'title' => generateTitle($relation), 'properties' => $relation->getProperties());
 					$usedRelationIds[] = $relationId;
+					unset($title);
 				}
 			}
 		}
@@ -104,7 +139,7 @@
 
 		foreach($returnArray['properties'] as $property => $value)
 		{
-			$title .= "<b>$property:</b> $value <br>";
+			$title .= "<b>$property:</b> $value <br />";
 		}
 		$returnArray['title'] = $title;
 
@@ -123,7 +158,7 @@
 
 		foreach($relationData['properties'] as $property => $value)
 		{
-			$title .= "<b>$property:</b> $value <br>";
+			$title .= "<b>$property:</b> $value <br />";
 		}
 
 		$returnArray['from']		= 	$relationData['from'];
