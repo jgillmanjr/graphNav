@@ -71,7 +71,12 @@
 				$label = (string)$neo4jObject->getId(); // Apparently, vis.js doesn't like it if the label is not a string
 			}
 
-			$return = array('id' => $neo4jObject->getId(), 'label' => $label, 'title' => generateTitle($neo4jObject), 'properties' => $neo4jObject->getProperties());
+			foreach($neo4jObject->getLabels() as $neolabel)
+			{
+				$neo4jLabels[] = $neolabel->getName();
+			}
+
+			$return = array('id' => $neo4jObject->getId(), 'label' => $label, 'title' => generateTitle($neo4jObject), 'properties' => $neo4jObject->getProperties(), 'neo4jLabels' => $neo4jLabels);
 		}
 		else // Relationship object
 		{
@@ -162,5 +167,51 @@
 		$returnArray = genReturnData($relation);
 
 		echo json_encode($returnArray);
+	}
+
+	if($_GET['action'] == 'loadNode')
+	{
+		$nodeId = $_POST['nodeId'];
+
+		$neo4jObject = $neo4jClient->getNode($nodeId);
+
+		echo json_encode(genReturnData($neo4jObject));
+	}
+
+	if($_GET['action'] == 'updateNode')
+	{
+		$nodeId = $_POST['nodeId'];
+		$nodeProperties = json_decode($_POST['nodeProperties'], TRUE);
+		$nodeLabels = json_decode($_POST['nodeLabels'], TRUE);
+
+		$neo4jObject = $neo4jClient->getNode($nodeId);
+
+		// Clean out all existing properties
+		if(count($neo4jObject->getProperties()) > 0)
+		{
+			foreach($neo4jObject->getProperties() as $property => $value)
+			{
+				$neo4jObject->removeProperty($property);
+			}
+		}
+
+		// Clean out labels if exist
+		if(count($neo4jObject->getLabels()) > 0)
+		{
+			$neo4jObject->removeLabels($neo4jObject->getLabels());
+		}
+
+		$neo4jObject->setProperties($nodeProperties)->save();
+
+		if(count($nodeLabels) > 0)
+		{
+			foreach($nodeLabels as $label)
+			{
+				$labelsArray[] = $neo4jClient->makeLabel($label);
+			}
+			$neo4jObject->addLabels($labelsArray);
+		}
+
+		echo json_encode(genReturnData($neo4jObject));
 	}
 ?>

@@ -26,6 +26,10 @@ var options =
 		onConnect: function(data, callback)
 		{
 			newRelation(data);
+		},
+		onEdit: function(data, callback)
+		{
+			editNode(data, callback);
 		}
 	};
 
