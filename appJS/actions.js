@@ -67,6 +67,27 @@ function createNode()
 	clearNodePopup();
 }
 
+function deleteNodes(nodeIds)
+{
+	// Delete the relation from Neo4j
+	$.ajax('neo4jProxy.php?action=deleteNodes',
+		{
+			type: 'POST',
+			async: true,
+			dataType:	'json',
+			data:
+				{
+					nodeIds: JSON.stringify(nodeIds)
+				},
+			success:
+				function(returnData, textStatus, jqXHR)
+				{
+					data.nodes.remove(returnData);
+				}
+		}
+	);
+}
+
 function editNode(workingData,callback)
 {
 	var freshData = new Object();
@@ -387,9 +408,7 @@ function deleteRelations(relationIds)
 			success:
 				function(returnData, textStatus, jqXHR)
 				{
-					console.log(returnData); // Debugging
 					data.edges.remove(returnData);
-					alert("Relations deleted");
 				}
 		}
 	);

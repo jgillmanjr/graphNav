@@ -171,7 +171,14 @@
 
 	if($_GET['action'] == 'deleteNodes')
 	{
+		$nodeIds = json_decode($_POST['nodeIds'], TRUE);
 
+		foreach($nodeIds as $nodeId)
+		{
+			$neo4jClient->getNode($nodeId)->delete();
+		}
+
+		echo json_encode($nodeIds);
 	}
 
 	if($_GET['action'] == 'deleteRelations')

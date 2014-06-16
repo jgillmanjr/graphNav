@@ -41,7 +41,7 @@ var options =
 				}
 				else
 				{
-					console.log(data.nodes);
+					deleteNodes(data.nodes);
 				}
 			}
 		},
