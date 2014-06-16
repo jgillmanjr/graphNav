@@ -27,6 +27,24 @@ var options =
 		{
 			newRelation(data);
 		},
+		onDelete: function(data, callback)
+		{
+			if(data.nodes.length == 0) // Empty nodes array == deleting an edge. At least that's what it seems like.
+			{
+				deleteRelations(data.edges);
+			}
+			else
+			{
+				if(data.edges.length != 0) // Throw the warning that you can't delete nodes with relations in Neo4j
+				{
+					alert('You must remove relations before removing nodes');
+				}
+				else
+				{
+					console.log(data.nodes);
+				}
+			}
+		},
 		onEdit: function(data, callback)
 		{
 			editNode(data, callback);

@@ -169,6 +169,23 @@
 		echo json_encode($returnArray);
 	}
 
+	if($_GET['action'] == 'deleteNodes')
+	{
+
+	}
+
+	if($_GET['action'] == 'deleteRelations')
+	{
+		$relationIds = json_decode($_POST['relationIds'], TRUE);
+
+		foreach($relationIds as $relationId)
+		{
+			$neo4jClient->getRelationship($relationId)->delete();
+		}
+
+		echo json_encode($relationIds);
+	}
+
 	if($_GET['action'] == 'loadNode')
 	{
 		$nodeId = $_POST['nodeId'];

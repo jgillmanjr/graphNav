@@ -372,6 +372,28 @@ function newRelation(workingData)
 	$(relationPopDialog).append('<span class="relationProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" id="propValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
 
+function deleteRelations(relationIds)
+{
+	// Delete the relation from Neo4j
+	$.ajax('neo4jProxy.php?action=deleteRelations',
+		{
+			type: 'POST',
+			async: true,
+			dataType:	'json',
+			data:
+				{
+					relationIds: JSON.stringify(relationIds)
+				},
+			success:
+				function(returnData, textStatus, jqXHR)
+				{
+					console.log(returnData); // Debugging
+					data.edges.remove(returnData);
+					alert("Relations deleted");
+				}
+		}
+	);
+}
 /**
  *
  * End Relation Related Functions
