@@ -1,3 +1,10 @@
+#bigBoard
+{
+	width:	80%;
+	margin-left:	auto;
+	margin-right:	auto;
+}
+
 #relationPopup
 {
 	text-align:	center;
@@ -6,6 +13,11 @@
 #nodePopup
 {
 	text-align:	center;
+}
+
+.graph-frame
+{
+	outline-style:	dashed;
 }
 
 .no-close .ui-dialog-titlebar-close
