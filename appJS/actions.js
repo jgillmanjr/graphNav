@@ -3,6 +3,38 @@
  * Jason Gillman Jr. <jason@rrfaae.com>
  */
 
+ /**
+ *
+ * Miscellanious Functions
+ *
+ */
+
+ function refreshGraph()
+ {
+ 	data.edges.clear();
+ 	data.nodes.clear();
+
+ 	$.ajax('neo4jProxy.php?action=retrieveAll',
+		{
+			type: 'GET',
+			async: false,
+			dataType:	'json',
+			success:
+				function(returnData, textStatus, jqXHR)
+				{
+					data.nodes.add(returnData.nodes);
+					data.edges.add(returnData.edges);
+				}
+		}
+	);
+ }
+
+ /**
+  *
+  * End Miscellanious Functions
+  *
+  */
+
 /**
  *
  * Node Related Functions
