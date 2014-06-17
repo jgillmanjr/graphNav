@@ -62,58 +62,6 @@ function clearNodePopup()
 	$('#nodePopup').empty();
 }
 
-function createNode()
-{
-	// Get the properties
-	var nodeProperties = new Object()
-	$('.nodeProperty').each(
-		function()
-		{
-			pLabel = $(this).find('.propertyLabel').val();
-			pValue = $(this).find('.propertyValue').val();
-
-			if(pLabel != "" & pValue != "") // If either are empty, don't add them
-			{
-				nodeProperties[pLabel] = pValue;
-			}
-		}
-	);
-
-	// Get the labels
-	var nodeLabels = new Array();
-	$('.nodeLabel').each(
-		function()
-		{
-			var workLabel = $(this).find('.labelValue').val()
-			if(workLabel != "") // Stuff breaks if you pass in a null label to the neo4j library
-			{
-				nodeLabels.push(workLabel);
-			}
-		}
-	);
-
-	// Create the node in Neo4j
-	$.ajax('neo4jProxy.php?action=addNode',
-		{
-			type: 'POST',
-			async: true,
-			dataType:	'json',
-			data:
-				{
-					nodeProperties: JSON.stringify(nodeProperties),
-					nodeLabels:		JSON.stringify(nodeLabels)
-				},
-			success:
-				function(returnData, textStatus, jqXHR)
-				{
-					data.nodes.add(returnData);
-				}
-		}
-	);
-
-	clearNodePopup();
-}
-
 function deleteNodes(nodeIds)
 {
 	// Delete the relation from Neo4j
@@ -142,7 +90,7 @@ function nodeAction(action, nodeId, callback)
 	if(action == 'new') // New node being created
 	{
 		title = 'Create New Node';
-		clickFunc = function(){createNode();};
+		clickFunc = function(){data.nodes.add(nodeToNeo4j());};
 	}
 	else // Editing existing node
 	{
@@ -167,7 +115,7 @@ function nodeAction(action, nodeId, callback)
 
 		title = 'Editing Node: ' + freshData.id;
 
-		clickFunc = function(){callback(updateNode(freshData.id));};
+		clickFunc = function(){callback(nodeToNeo4j(freshData.id));};
 	}
 
 	/**
@@ -253,7 +201,7 @@ function nodeAction(action, nodeId, callback)
 	$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
 
-function updateNode(nodeId)
+function nodeToNeo4j(nodeId)
 {
 	var updatedData = new Object();
 
@@ -284,30 +232,54 @@ function updateNode(nodeId)
 			}
 		}
 	);
-	// Create the node in Neo4j
-	$.ajax('neo4jProxy.php?action=updateNode',
-		{
-			type: 'POST',
-			async: false,
-			dataType:	'json',
-			data:
-				{
-					nodeId:	nodeId,
-					nodeProperties: JSON.stringify(nodeProperties),
-					nodeLabels:		JSON.stringify(nodeLabels)
-				},
-			success:
-				function(returnData, textStatus, jqXHR)
-				{
-					updatedData = returnData;
-				}
-		}
-	);
+
+	if(nodeId !== undefined) // Update an existing node
+	{
+		$.ajax('neo4jProxy.php?action=updateNode',
+			{
+				type: 'POST',
+				async: false,
+				dataType:	'json',
+				data:
+					{
+						nodeId:	nodeId,
+						nodeProperties: JSON.stringify(nodeProperties),
+						nodeLabels:		JSON.stringify(nodeLabels)
+					},
+				success:
+					function(returnData, textStatus, jqXHR)
+					{
+						updatedData = returnData;
+					}
+			}
+		);
+	}
+	else // Brand new node
+	{
+		$.ajax('neo4jProxy.php?action=addNode',
+			{
+				type: 'POST',
+				async: false,
+				dataType:	'json',
+				data:
+					{
+						nodeProperties: JSON.stringify(nodeProperties),
+						nodeLabels:		JSON.stringify(nodeLabels)
+					},
+				success:
+					function(returnData, textStatus, jqXHR)
+					{
+						//data.nodes.add(returnData);
+						updatedData = returnData;
+					}
+			}
+		);
+	}
 
 	clearNodePopup();
-
 	return updatedData;
 }
+
 /**
  *
  * End Node Related Functions
