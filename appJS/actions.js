@@ -135,33 +135,50 @@ function deleteNodes(nodeIds)
 	);
 }
 
-function editNode(workingData,callback)
+function nodeAction(action, nodeId, callback)
 {
-	var freshData = new Object();
-	// Load data from Neo4j in the off chance that existing data is stale
-	$.ajax('neo4jProxy.php?action=loadNode',
-		{
-			type: 'POST',
-			async: false,
-			dataType:	'json',
-			data:
-				{
-					nodeId: workingData.id
-				},
-			success:
-				function(returnData, textStatus, jqXHR)
-				{
-					freshData = returnData;
-				}
-		}
-	);
+	var title;
+	var clickFunc;
+	if(action == 'new') // New node being created
+	{
+		title = 'Create New Node';
+		clickFunc = function(){createNode();};
+	}
+	else // Editing existing node
+	{
+		var freshData = new Object();
+		// Load data from Neo4j in the off chance that existing data is stale
+		$.ajax('neo4jProxy.php?action=loadNode',
+			{
+				type: 'POST',
+				async: false,
+				dataType:	'json',
+				data:
+					{
+						nodeId: nodeId
+					},
+				success:
+					function(returnData, textStatus, jqXHR)
+					{
+						freshData = returnData;
+					}
+			}
+		);
 
+		title = 'Editing Node: ' + freshData.id;
+
+		clickFunc = function(){callback(updateNode(freshData.id));};
+	}
+
+	/**
+	 * Start common popup stuff
+	 */
 	var nodePopDialog = $('#nodePopup').dialog(
 		{
 			dialogClass: "no-close",
 			height: 300,
 			width: 600,
-			title: "Editing Node: " + freshData.id,
+			title: title,
 			buttons:
 			[
 				{
@@ -182,74 +199,7 @@ function editNode(workingData,callback)
 					text: "Save",
 					click: function()
 						{
-							callback(updateNode(freshData.id));
-						}
-				},
-				{
-					text: "Cancel",
-					click: function()
-						{
-							clearNodePopup();
-						}
-				}
-			]
-		}
-	);
-
-
-
-	$(nodePopDialog).append('<span id="nodeLabelHeader">Node Labels</span><br />');
-	if(freshData.neo4jLabels != null) // Null check
-	{
-		for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
-		{
-			$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" value="' + htmlspecialchars(freshData.neo4jLabels[i]) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-		}
-	}
-	$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-
-	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />');
-	if(Object.keys(freshData.properties).length > 0)
-	{
-		for(i = 0; i <= (Object.keys(freshData.properties).length - 1); ++i)
-		{
-			var pName = Object.keys(freshData.properties)[i];
-			var pValue = freshData.properties[pName];
-			$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /> Value: <input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-		}
-	}
-	$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-}
-
-function newNode()
-{
-	var nodePopDialog = $('#nodePopup').dialog(
-		{
-			dialogClass: "no-close",
-			height: 300,
-			width: 600,
-			title: "Create New Node",
-			buttons:
-			[
-				{
-					text: "Add Label",
-					click: function()
-						{
-							$('#nodePropsHeader').before('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>'); // So it goes before the property header
-						}
-				},
-				{
-					text: "Add Property",
-					click: function()
-						{
-							$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-						}
-				},
-				{
-					text: "Save",
-					click: function()
-						{
-							createNode();
+							clickFunc();
 						}
 				},
 				{
@@ -264,11 +214,44 @@ function newNode()
 	);
 
 	$(nodePopDialog).append('<span id="nodeLabelHeader">Node Labels</span><br />');
+
+	/**
+	 * Labels
+	 */
+	if(action != 'new') // Node editing
+	{
+		if(freshData.neo4jLabels != null) // Null check
+		{
+			for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
+			{
+				$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" value="' + htmlspecialchars(freshData.neo4jLabels[i]) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+			}
+		}
+	}
+
 	$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+
+
+	/**
+	 * Properties
+	 */
 	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />');
+
+	if(action != 'new') // Node editing
+	{
+		if(Object.keys(freshData.properties).length > 0)
+		{
+			for(i = 0; i <= (Object.keys(freshData.properties).length - 1); ++i)
+			{
+				var pName = Object.keys(freshData.properties)[i];
+				var pValue = freshData.properties[pName];
+				$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /> Value: <input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+			}
+		}
+	}
+
 	$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 }
-
 
 function updateNode(nodeId)
 {
