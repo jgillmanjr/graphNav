@@ -10,11 +10,11 @@
  */
 
 function refreshGraph()
-	{
-		data.edges.clear();
-		data.nodes.clear();
+{
+	data.edges.clear();
+	data.nodes.clear();
 
-		$.ajax('neo4jProxy.php?action=retrieveAll',
+	$.ajax('neo4jProxy.php?action=retrieveAll',
 		{
 			type: 'GET',
 			async: false,
@@ -27,11 +27,13 @@ function refreshGraph()
 				}
 		}
 	);
+
+	graph.redraw();
 }
 
 function htmlspecialchars(str)
 {
-	if (typeof(str) == "string")
+	if(typeof(str) == "string")
 	{
 		str = str.replace(/&/g, "&amp;"); /* must do &amp; first */
 		str = str.replace(/"/g, "&quot;");
