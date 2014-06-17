@@ -9,12 +9,12 @@
  *
  */
 
- function refreshGraph()
- {
- 	data.edges.clear();
- 	data.nodes.clear();
+function refreshGraph()
+	{
+		data.edges.clear();
+		data.nodes.clear();
 
- 	$.ajax('neo4jProxy.php?action=retrieveAll',
+		$.ajax('neo4jProxy.php?action=retrieveAll',
 		{
 			type: 'GET',
 			async: false,
@@ -27,7 +27,20 @@
 				}
 		}
 	);
- }
+}
+
+function htmlspecialchars(str)
+{
+	if (typeof(str) == "string")
+	{
+		str = str.replace(/&/g, "&amp;"); /* must do &amp; first */
+		str = str.replace(/"/g, "&quot;");
+		str = str.replace(/'/g, "&#039;");
+		str = str.replace(/</g, "&lt;");
+		str = str.replace(/>/g, "&gt;");
+	}
+	return str;
+}
 
  /**
   *
@@ -188,7 +201,7 @@ function editNode(workingData,callback)
 	{
 		for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
 		{
-			$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" value="' + freshData.neo4jLabels[i] + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+			$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" value="' + htmlspecialchars(freshData.neo4jLabels[i]) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 		}
 	}
 	$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
@@ -200,7 +213,7 @@ function editNode(workingData,callback)
 		{
 			var pName = Object.keys(freshData.properties)[i];
 			var pValue = freshData.properties[pName];
-			$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" value="' + pName + '" /> Value: <input type="text" class="propertyValue" value="' + pValue + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+			$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /> Value: <input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
 		}
 	}
 	$(nodePopDialog).append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
