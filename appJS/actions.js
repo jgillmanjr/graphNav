@@ -301,7 +301,6 @@ function updateNode(nodeId)
 			}
 		}
 	);
-
 	// Create the node in Neo4j
 	$.ajax('neo4jProxy.php?action=updateNode',
 		{
@@ -317,12 +316,6 @@ function updateNode(nodeId)
 			success:
 				function(returnData, textStatus, jqXHR)
 				{
-					/*
-					data.nodes.data[returnData.id].label = returnData.label;
-					data.nodes.data[returnData.id].title = returnData.title;
-					data.nodes.data[returnData.id].neo4jLabels = returnData.neo4jLabels;
-					data.nodes.data[returnData.id].properties = returnData.properties;
-					*/
 					updatedData = returnData;
 				}
 		}
