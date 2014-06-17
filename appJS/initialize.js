@@ -21,7 +21,7 @@ var options =
 		dataManipulation: true,
 		onAdd: function(data, callback)
 		{
-			 newNode();
+			 nodeAction('new');
 		},
 		onConnect: function(data, callback)
 		{
@@ -51,7 +51,7 @@ var options =
 		},
 		onEdit: function(data, callback)
 		{
-			editNode(data, callback);
+			nodeAction('edit', data.id, callback);
 		}
 	};
 
