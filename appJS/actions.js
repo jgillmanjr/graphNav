@@ -140,7 +140,7 @@ function nodeAction(action, nodeId, callback)
 					text: "Add Property",
 					click: function()
 						{
-							$('#propertyTable').append('<span class="nodeProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+							$('#propertyTable').append('<tr><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 						}
 				},
 				{
@@ -194,12 +194,12 @@ function nodeAction(action, nodeId, callback)
 			{
 				var pName = Object.keys(freshData.properties)[i];
 				var pValue = freshData.properties[pName];
-				$('#propertyTable').append('<tr><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="button" value="-" onclick="$(this).parent().remove();" /></td></tr>');
+				$('#propertyTable').append('<tr><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 			}
 		}
 	}
 
-	$('#propertyTable').append('<tr><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().remove();" /></td></tr>');
+	$('#propertyTable').append('<tr><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 	$('#propertyTable').append('</table>')
 }
 
