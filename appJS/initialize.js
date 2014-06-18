@@ -25,11 +25,8 @@ var options =
 		},
 		onConnect: function(data, callback)
 		{
-			if(data.from == data.to)
-			{
-				alert("It appears you're trying to create a relation to the same node.\n\nCurrently, you can't select the link within graphNav to delete it (you'll need to remove it from Neo4j manually)\n\nIf this is in error, please cancel out of the operation when you get the popup.");
-			}
-			newRelation(data);
+			//newRelation(data);
+			relationAction('new', data)
 		},
 		onDelete: function(data, callback)
 		{
@@ -52,6 +49,10 @@ var options =
 		onEdit: function(data, callback)
 		{
 			nodeAction('edit', data.id, callback);
+		},
+		onEditEdge: function(data, callback)
+		{
+			relationAction('edit', data, data.id, callback);
 		}
 	};
 

@@ -202,6 +202,15 @@
 		echo json_encode(genReturnData($neo4jObject));
 	}
 
+	if($_GET['action'] == 'loadRelation')
+	{
+		$relationId = $_POST['relationId'];
+
+		$neo4jObject = $neo4jClient->getRelationship($relationId);
+
+		echo json_encode(genReturnData($neo4jObject));
+	}
+
 	if($_GET['action'] == 'updateNode')
 	{
 		$nodeId = $_POST['nodeId'];
@@ -235,6 +244,27 @@
 			}
 			$neo4jObject->addLabels($labelsArray);
 		}
+
+		echo json_encode(genReturnData($neo4jObject));
+	}
+
+	if($_GET['action'] == 'updateRelation')
+	{
+		$relationId = $_POST['relationId'];
+		$relationProperties = json_decode($_POST['relationProperties'], TRUE);
+
+		$neo4jObject = $neo4jClient->getRelationship($relationId);
+
+		// Clean out all existing properties
+		if(count($neo4jObject->getProperties()) > 0)
+		{
+			foreach($neo4jObject->getProperties() as $property => $value)
+			{
+				$neo4jObject->removeProperty($property);
+			}
+		}
+
+		$neo4jObject->setProperties($relationProperties)->save();
 
 		echo json_encode(genReturnData($neo4jObject));
 	}
