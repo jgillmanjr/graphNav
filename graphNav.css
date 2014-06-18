@@ -15,6 +15,12 @@
 	text-align:	center;
 }
 
+#propertyTable
+{
+	text-align:	center;
+	width:	100%;
+}
+
 .graph-frame
 {
 	outline-style:	dashed;
