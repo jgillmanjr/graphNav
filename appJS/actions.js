@@ -382,7 +382,7 @@ function relationAction(action, workingData, relationId, callback)
 					text: "Add Property",
 					click: function()
 						{
-							$(relationPopDialog).append('<span class="relationProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+							$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 						}
 				},
 				{
@@ -418,6 +418,8 @@ function relationAction(action, workingData, relationId, callback)
 	}
 
 	$(relationPopDialog).append('<span id="relationPropsHeader">Relation Properties</span><br />');
+	$(relationPopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Remove Property</th></tr>');
+
 	if(action != 'new') // Relation editing
 	{
 		if(Object.keys(freshData.properties).length > 0)
@@ -426,11 +428,12 @@ function relationAction(action, workingData, relationId, callback)
 			{
 				var pName = Object.keys(freshData.properties)[i];
 				var pValue = freshData.properties[pName];
-				$(relationPopDialog).append('<span class="relationProperty">Name: <input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /> Value: <input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+				$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 			}
 		}
 	}
-	$(relationPopDialog).append('<span class="relationProperty">Name: <input type="text" class="propertyLabel" /> Value: <input type="text" class="propertyValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+	$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+	$('#propertyTable').append('</table>')
 }
 
 function relationToNeo4j(workingData, relationId)
