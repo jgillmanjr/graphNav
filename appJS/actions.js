@@ -140,7 +140,7 @@ function nodeAction(action, nodeId, callback)
 					text: "Add Property",
 					click: function()
 						{
-							$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+							$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td><td><input type="checkbox" class="propertyType" /></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 						}
 				},
 				{
@@ -184,7 +184,7 @@ function nodeAction(action, nodeId, callback)
 	 * Properties
 	 */
 	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />');
-	$(nodePopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Remove Property</th></tr>')
+	$(nodePopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>')
 
 	if(action != 'new') // Node editing
 	{
@@ -194,12 +194,20 @@ function nodeAction(action, nodeId, callback)
 			{
 				var pName = Object.keys(freshData.properties)[i];
 				var pValue = freshData.properties[pName];
-				$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
+				{
+					isNum = "checked";
+				}
+				else
+				{
+					isNum = "";
+				}
+				$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 			}
 		}
 	}
 
-	$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+	$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 	$('#propertyTable').append('</table>')
 }
 
@@ -214,10 +222,18 @@ function nodeToNeo4j(nodeId)
 		{
 			pLabel = $(this).find('.propertyLabel').val();
 			pValue = $(this).find('.propertyValue').val();
+			isNum = $(this).find('.propertyType').is(':checked');
 
 			if(pLabel != "" & pValue != "") // If either are empty, don't add them
 			{
-				nodeProperties[pLabel] = pValue;
+				if(isNum & !isNaN(parseFloat(pValue))) // If it's a number..
+				{
+					nodeProperties[pLabel] = parseFloat(pValue);
+				}
+				else // Store it as a string
+				{
+					nodeProperties[pLabel] = pValue;
+				}
 			}
 		}
 	);
@@ -382,7 +398,7 @@ function relationAction(action, workingData, relationId, callback)
 					text: "Add Property",
 					click: function()
 						{
-							$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+							$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 						}
 				},
 				{
@@ -418,7 +434,7 @@ function relationAction(action, workingData, relationId, callback)
 	}
 
 	$(relationPopDialog).append('<span id="relationPropsHeader">Relation Properties</span><br />');
-	$(relationPopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Remove Property</th></tr>');
+	$(relationPopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>');
 
 	if(action != 'new') // Relation editing
 	{
@@ -428,11 +444,19 @@ function relationAction(action, workingData, relationId, callback)
 			{
 				var pName = Object.keys(freshData.properties)[i];
 				var pValue = freshData.properties[pName];
-				$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
+				{
+					isNum = "checked";
+				}
+				else
+				{
+					isNum = "";
+				}
+				$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 			}
 		}
 	}
-	$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+	$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
 	$('#propertyTable').append('</table>')
 }
 
@@ -447,10 +471,18 @@ function relationToNeo4j(workingData, relationId)
 		{
 			pLabel = $(this).find('.propertyLabel').val();
 			pValue = $(this).find('.propertyValue').val();
-			
+			isNum = $(this).find('.propertyType').is(':checked');
+
 			if(pLabel != "" & pValue != "") // If either are empty, don't add them
 			{
-				relProperties[pLabel] = pValue;
+				if(isNum & !isNaN(parseFloat(pValue))) // If it's a number..
+				{
+					relProperties[pLabel] = parseFloat(pValue);
+				}
+				else // Store it as a string
+				{
+					relProperties[pLabel] = pValue;
+				}
 			}
 		}
 	);
