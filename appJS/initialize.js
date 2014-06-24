@@ -64,7 +64,7 @@ var options =
 $.ajax('neo4jProxy.php?action=retrieveAll',
 	{
 		type: 'GET',
-		async: false,
+		async: true,
 		dataType:	'json',
 		success:
 			function(returnData, textStatus, jqXHR)
@@ -74,5 +74,7 @@ $.ajax('neo4jProxy.php?action=retrieveAll',
 			}
 	}
 );
+
+filterLabels();
 
 var graph = new vis.Graph(container, data, options);

@@ -12,8 +12,15 @@
 		<link href="graphNav.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
-		<input type="button" value="Refresh Graph" onclick="refreshGraph();" />
-		<div id="bigBoard"></div>
+		<div class="organizer">
+			<input type="button" value="Refresh Graph" onclick="refreshGraph();" /><br />
+			
+			Filter by labels<br />
+			<select id="labelFilter" multiple size="10">
+			</select>
+		</div>
+
+		<div class="organizer" id="bigBoard"></div>
 		<script src="appJS/initialize.js"></script>
 
 		<div id="nodePopup"></div>
