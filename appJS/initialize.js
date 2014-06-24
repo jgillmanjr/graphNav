@@ -75,25 +75,6 @@ $.ajax('neo4jProxy.php?action=retrieveAll',
 	}
 );
 
-/**
- *
- * Get labels for filtering
- *
- */
-$.ajax('neo4jProxy.php?action=listLabels',
-	{
-		type: 'GET',
-		async: true,
-		dataType:	'json',
-		success:
-			function(returnData, textStatus, jqXHR)
-			{
-				for(i = 0; i <= (returnData.length - 1); ++i)
-				{
-					$('#labelFilter').append('<option value="' + htmlspecialchars(returnData[i]) + '">' + returnData[i] + '</option>');
-				}
-			}
-	}
-);
+filterLabels();
 
 var graph = new vis.Graph(container, data, options);

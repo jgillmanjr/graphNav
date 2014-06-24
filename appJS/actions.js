@@ -67,6 +67,33 @@ function htmlspecialchars(str)
 	return str;
 }
 
+function filterLabels()
+{
+	/**
+	*
+	* Get labels for filtering
+	*
+	*/
+
+	$('#labelFilter').empty(); // Clear out if previously populated
+
+	$.ajax('neo4jProxy.php?action=listLabels',
+		{
+			type: 'GET',
+			async: true,
+			dataType:	'json',
+			success:
+				function(returnData, textStatus, jqXHR)
+				{
+					for(i = 0; i <= (returnData.length - 1); ++i)
+					{
+						$('#labelFilter').append('<option value="' + htmlspecialchars(returnData[i]) + '">' + returnData[i] + '</option>');
+					}
+				}
+		}
+	);
+}
+
  /**
   *
   * End Miscellanious Functions
@@ -101,6 +128,8 @@ function deleteNodes(nodeIds)
 				function(returnData, textStatus, jqXHR)
 				{
 					data.nodes.remove(returnData);
+
+					filterLabels(); // Update labels that can be filtered in the event you just deleted the last node to use a label
 				}
 		}
 	);
@@ -318,6 +347,7 @@ function nodeToNeo4j(nodeId)
 	}
 
 	clearNodePopup();
+	filterLabels(); // Update the label listing on the chance there were new labels in use, or no longer in use
 	return updatedData;
 }
 
