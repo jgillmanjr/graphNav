@@ -260,7 +260,10 @@
 	{
 		foreach($neo4jClient->getLabels() as $label)
 		{
-			$labelArray[] = $label->getName();
+			if(count($label->getNodes()) > 0) // Only show labels that actually have nodes. Reduces clutter.
+			{
+				$labelArray[] = $label->getName();
+			}
 		}
 
 		echo json_encode($labelArray);
