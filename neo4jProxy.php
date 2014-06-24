@@ -132,6 +132,69 @@
 		echo json_encode($returnArray);
 	}
 
+	if($_GET['action'] == 'retrieveByLabel') // Get nodes that have any of the labels
+	{
+		$labels = json_decode($_POST['labels'], TRUE);
+		
+		if(count($labels) == 1) // Only filtering on a single label
+		{
+			$whereClause = 'WHERE n:`' . $labels[0] . '` ';
+		}
+		else
+		{
+			$whereClause = 'WHERE n:`' . $labels[0] . '` ';
+			foreach($labels as $idx => $label)
+			{
+				if($idx > 0)
+				{
+					$whereClause .= 'OR n:`' . $label . '` ';
+				}
+			}
+		}
+
+
+		$queryString = 'MATCH n ' . $whereClause . 'OPTIONAL MATCH n-[r]-o ' . $whereClause . 'RETURN id(n) AS startId, n AS startNode, id(r) AS relationId, r AS relation, id(o) AS endId, o AS endNode';
+		$query = new Neo4j\Cypher\Query($neo4jClient, $queryString);
+		$result = $query->getResultSet();
+
+		$usedNodeIds = array(); // Initialize
+		$usedRelationIds = array(); // Initialize
+		$returnArray['nodes'] = array(); // Initialize
+		$returnArray['edges'] = array(); // Initialize
+
+		foreach($result as $row)
+		{
+			$startId = $row['startId'];
+			$startNode = $row['startNode'];
+			$relationId = $row['relationId'];
+			$relation = $row['relation'];
+			$endId = $row['endId'];
+			$endNode = $row['endNode'];
+
+			if(!in_array($startId, $usedNodeIds)) // vis.js doesn't like duplicate nodes, so don't add them if already in there
+			{
+				$returnArray['nodes'][] = genReturnData($startNode);
+				$usedNodeIds[] = $startId;
+			}
+
+			if(is_a($relation,'Everyman\Neo4j\Relationship'))
+			{
+				if(!in_array($endId, $usedNodeIds))
+				{
+					$returnArray['nodes'][] = genReturnData($endNode);
+					$usedNodeIds[] = $endId;
+				}
+
+				if(!in_array($relationId, $usedRelationIds)) // More than one identical relation doesn't break vis.js, but it doubles up the connections (though it does look kind of neat)
+				{
+					$returnArray['edges'][] = genReturnData($relation);
+					$usedRelationIds[] = $relationId;
+				}
+			}
+		}
+		echo json_encode($returnArray);
+	}
+
 	if($_GET['action'] == 'addNode')
 	{
 		$nodeProperties = json_decode($_POST['nodeProperties'], TRUE);
@@ -191,6 +254,16 @@
 		}
 
 		echo json_encode($relationIds);
+	}
+
+	if($_GET['action'] == 'listLabels')
+	{
+		foreach($neo4jClient->getLabels() as $label)
+		{
+			$labelArray[] = $label->getName();
+		}
+
+		echo json_encode($labelArray);
 	}
 
 	if($_GET['action'] == 'loadNode')

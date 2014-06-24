@@ -14,19 +14,42 @@ function refreshGraph()
 	data.edges.clear();
 	data.nodes.clear();
 
-	$.ajax('neo4jProxy.php?action=retrieveAll',
-		{
-			type: 'GET',
-			async: false,
-			dataType:	'json',
-			success:
-				function(returnData, textStatus, jqXHR)
-				{
-					data.nodes.add(returnData.nodes);
-					data.edges.add(returnData.edges);
-				}
-		}
-	);
+	if($('#labelFilter').val() === null) // No labels selected to filter on
+	{
+		$.ajax('neo4jProxy.php?action=retrieveAll',
+			{
+				type: 'GET',
+				async: false,
+				dataType:	'json',
+				success:
+					function(returnData, textStatus, jqXHR)
+					{
+						data.nodes.add(returnData.nodes);
+						data.edges.add(returnData.edges);
+					}
+			}
+		);
+	}
+	else // Refresh the graph displaying only nodes with the selected properties as well as nodes directly related
+	{
+		$.ajax('neo4jProxy.php?action=retrieveByLabel',
+			{
+				type: 'POST',
+				async: false,
+				dataType:	'json',
+				data:
+					{
+						labels: JSON.stringify($('#labelFilter').val())
+					},
+				success:
+					function(returnData, textStatus, jqXHR)
+					{
+						data.nodes.add(returnData.nodes);
+						data.edges.add(returnData.edges);
+					}
+			}
+		);
+	}
 
 	graph.redraw();
 }

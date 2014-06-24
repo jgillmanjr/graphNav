@@ -64,13 +64,34 @@ var options =
 $.ajax('neo4jProxy.php?action=retrieveAll',
 	{
 		type: 'GET',
-		async: false,
+		async: true,
 		dataType:	'json',
 		success:
 			function(returnData, textStatus, jqXHR)
 			{
 				data.nodes.add(returnData.nodes);
 				data.edges.add(returnData.edges);
+			}
+	}
+);
+
+/**
+ *
+ * Get labels for filtering
+ *
+ */
+$.ajax('neo4jProxy.php?action=listLabels',
+	{
+		type: 'GET',
+		async: true,
+		dataType:	'json',
+		success:
+			function(returnData, textStatus, jqXHR)
+			{
+				for(i = 0; i <= (returnData.length - 1); ++i)
+				{
+					$('#labelFilter').append('<option value="' + htmlspecialchars(returnData[i]) + '">' + returnData[i] + '</option>');
+				}
 			}
 	}
 );
