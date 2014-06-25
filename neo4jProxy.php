@@ -80,7 +80,7 @@
 		}
 		else // Relationship object
 		{
-			$return = array('from' => $neo4jObject->getStartNode()->getId(), 'to' => $neo4jObject->getEndNode()->getId(), 'label' => $neo4jObject->getType(), 'id' => $neo4jObject->getId(), 'title' => generateTitle($neo4jObject), 'properties' => $neo4jObject->getProperties());
+			$return = array('from' => $neo4jObject->getStartNode()->getId(), 'to' => $neo4jObject->getEndNode()->getId(), 'label' => $neo4jObject->getType(), 'id' => $neo4jObject->getId(), 'title' => generateTitle($neo4jObject), 'properties' => $neo4jObject->getProperties(), 'style' => 'arrow');
 		}
 
 		return $return;
