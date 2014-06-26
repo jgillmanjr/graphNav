@@ -24,6 +24,9 @@ As mentioned, you'll need Composer and Bower to handle the front and back end de
 1. `bower install`
 1. Edit `hostInfo.php` to reflect the proper location and port of the Neo4j database you would like to use
 
+**Alternatively**
+If you use docker, there is an image. Take a look [here](https://registry.hub.docker.com/u/jgillmanjr/graphnav/)
+
 ### Usage
 Point your browser to index.html to load up the app. At this point, you'll see the canvas, a button to refresh the graph, and a selection box to filter nodes by label (as well as their directly connected nodes).
 If you have any data in Neo4j, it will automatically populate (assuming graphNav is communicating properly with the database).
