@@ -177,7 +177,7 @@ function nodeAction(action, nodeId, callback)
 		{
 			dialogClass: "no-close",
 			height: 300,
-			width: 600,
+			width: 700,
 			title: title,
 			buttons:
 			[
@@ -220,6 +220,23 @@ function nodeAction(action, nodeId, callback)
 	 */
 	if(action != 'new') // Node editing
 	{
+		// Add clone button
+		var existingButtons = $(nodePopDialog).dialog("option", "buttons");
+
+		var cloneButton =
+		{
+			text:	"Clone",
+			click:	function()
+				{
+					data.nodes.add(nodeToNeo4j('cloned'));
+				}
+		};
+
+		existingButtons.unshift(cloneButton);
+		$(nodePopDialog).dialog("option", "buttons", existingButtons);
+
+		// End add clone button
+
 		if(freshData.neo4jLabels != null) // Null check
 		{
 			for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
@@ -303,7 +320,7 @@ function nodeToNeo4j(nodeId)
 		}
 	);
 
-	if(nodeId !== undefined) // Update an existing node
+	if(nodeId !== undefined & nodeId !== 'cloned') // Update an existing node
 	{
 		$.ajax('neo4jProxy.php?action=updateNode',
 			{
@@ -324,7 +341,7 @@ function nodeToNeo4j(nodeId)
 			}
 		);
 	}
-	else // Brand new node
+	else // New or cloned node
 	{
 		$.ajax('neo4jProxy.php?action=addNode',
 			{
@@ -346,7 +363,11 @@ function nodeToNeo4j(nodeId)
 		);
 	}
 
-	clearNodePopup();
+	if(nodeId !== 'cloned') // Close the popup since we aren't cloning
+	{
+		clearNodePopup();
+	}
+
 	filterLabels(); // Update the label listing on the chance there were new labels in use, or no longer in use
 	return updatedData;
 }
