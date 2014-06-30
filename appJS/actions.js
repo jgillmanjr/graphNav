@@ -220,6 +220,23 @@ function nodeAction(action, nodeId, callback)
 	 */
 	if(action != 'new') // Node editing
 	{
+		// Add clone button
+		var existingButtons = $(nodePopDialog).dialog("option", "buttons");
+
+		var cloneButton =
+		{
+			text:	"Clone",
+			click:	function()
+				{
+					data.nodes.add(nodeToNeo4j());
+				}
+		};
+
+		existingButtons.push(cloneButton);
+		$(nodePopDialog).dialog("option", "buttons", existingButtons);
+
+		// End add clone button
+
 		if(freshData.neo4jLabels != null) // Null check
 		{
 			for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
