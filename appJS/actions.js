@@ -228,7 +228,7 @@ function nodeAction(action, nodeId, callback)
 			text:	"Clone",
 			click:	function()
 				{
-					data.nodes.add(nodeToNeo4j());
+					data.nodes.add(nodeToNeo4j('cloned'));
 				}
 		};
 
@@ -320,7 +320,7 @@ function nodeToNeo4j(nodeId)
 		}
 	);
 
-	if(nodeId !== undefined) // Update an existing node
+	if(nodeId !== undefined & nodeId !== 'cloned') // Update an existing node
 	{
 		$.ajax('neo4jProxy.php?action=updateNode',
 			{
@@ -341,7 +341,7 @@ function nodeToNeo4j(nodeId)
 			}
 		);
 	}
-	else // Brand new node
+	else // New or cloned node
 	{
 		$.ajax('neo4jProxy.php?action=addNode',
 			{
@@ -363,7 +363,11 @@ function nodeToNeo4j(nodeId)
 		);
 	}
 
-	clearNodePopup();
+	if(nodeId !== 'cloned') // Close the popup since we aren't closing
+	{
+		clearNodePopup();
+	}
+
 	filterLabels(); // Update the label listing on the chance there were new labels in use, or no longer in use
 	return updatedData;
 }

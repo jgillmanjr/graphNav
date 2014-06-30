@@ -3,7 +3,9 @@ Changelog
 ## Version 0.4.0
 
 ### New Capabilities
-1. Can clone nodes by selecting the one you want to clone, clicking `Edit Node` and clicking the `Clone` button
+1. Can clone nodes by selecting the one you want to clone, clicking `Edit Node` and clicking the `Clone` button. For convenience, the popup will remain up so multiple clones can be made with ease.
+
+Note that for clones, if there is a change in any of the properties or labels, those will be propogated to the cloned nodes (which may actually be a benefit)
 
 -----------------------------------
 
