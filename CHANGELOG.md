@@ -5,6 +5,8 @@ Changelog
 ### New Capabilities
 1. Can clone nodes by selecting the one you want to clone, clicking `Edit Node` and clicking the `Clone` button
 
+-----------------------------------
+
 ## Version 0.3.0
 
 ### New Capabilities
@@ -14,7 +16,7 @@ Changelog
 ### Fixes / Tweaks
 1. `Refresh Graph` button and the `Filter by labels` selection box are now next to the graph as compared to above it
 
-
+-----------------------------------
 
 ## Version 0.2.0
 
@@ -25,7 +27,7 @@ Changelog
 ### Fixes / Tweaks
 1. Adjusted layout of properties when creating or editing nodes or relations
 
-
+-----------------------------------
 
 ## Version 0.1.0
 
