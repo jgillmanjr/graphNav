@@ -177,7 +177,7 @@ function nodeAction(action, nodeId, callback)
 		{
 			dialogClass: "no-close",
 			height: 300,
-			width: 600,
+			width: 700,
 			title: title,
 			buttons:
 			[
@@ -232,7 +232,7 @@ function nodeAction(action, nodeId, callback)
 				}
 		};
 
-		existingButtons.push(cloneButton);
+		existingButtons.unshift(cloneButton);
 		$(nodePopDialog).dialog("option", "buttons", existingButtons);
 
 		// End add clone button
