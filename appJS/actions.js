@@ -363,7 +363,7 @@ function nodeToNeo4j(nodeId)
 		);
 	}
 
-	if(nodeId !== 'cloned') // Close the popup since we aren't closing
+	if(nodeId !== 'cloned') // Close the popup since we aren't cloning
 	{
 		clearNodePopup();
 	}
