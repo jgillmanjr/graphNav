@@ -2,7 +2,7 @@ Changelog
 =========
 ## Version 0.4.1
 
-### Fixes / Tweeaks
+### Fixes / Tweaks
 1. Serious refactoring so that node and relation operations can use as much of the same code as possible. This will make life better when working on adding support for additional data types (such as booleans and arrays)
 
 -----------------------------------
