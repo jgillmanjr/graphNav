@@ -5,9 +5,352 @@
 
  /**
  *
- * Miscellanious Functions
+ * Miscellanious / Common Functions
  *
  */
+
+function clearPopup()
+{
+	$('#actionPopup').dialog("destroy");
+	$('#actionPopup').empty();
+}
+
+function filterLabels()
+{
+	/**
+	*
+	* Get labels for filtering
+	*
+	*/
+
+	$('#labelFilter').empty(); // Clear out if previously populated
+
+	$.ajax('neo4jProxy.php?action=listLabels',
+		{
+			type: 'GET',
+			async: true,
+			dataType:	'json',
+			success:
+				function(returnData, textStatus, jqXHR)
+				{
+					for(i = 0; i <= (returnData.length - 1); ++i)
+					{
+						$('#labelFilter').append('<option value="' + htmlspecialchars(returnData[i]) + '">' + returnData[i] + '</option>');
+					}
+				}
+		}
+	);
+
+	$('#labelFilter').select2({width: '150px'});
+}
+
+function htmlspecialchars(str)
+{
+	if(typeof(str) == "string")
+	{
+		str = str.replace(/&/g, "&amp;"); /* must do &amp; first */
+		str = str.replace(/"/g, "&quot;");
+		str = str.replace(/'/g, "&#039;");
+		str = str.replace(/</g, "&lt;");
+		str = str.replace(/>/g, "&gt;");
+	}
+	return str;
+}
+
+/**
+ *
+ * Makes things happen
+ * 
+ * type is either `node` or `relation`
+ * action is `new` or `edit`
+ * data is going to be mixed
+ *
+ */
+function objectAction(type, action, data)
+{
+	/**
+	 * Dialog initialization and buildout
+	 */
+	var actionDialog = $('#actionPopup').dialog(
+		{
+			dialogClass:	"no-close",
+			height:			400,
+			width:			700
+		}
+	);
+
+	/**
+	 * Skeleton code for making things happen in neo4j
+	 */
+	var toNeo4j	=	function(clone)
+		{
+			var proxyData = new Object(); // This will be used to feed into the data section of the ajax call
+
+			/**
+			 * Get the properties
+			 */
+			var properties	=	new Object();
+			$('.property').each(
+				function()
+				{
+					pLabel = $(this).find('.propertyLabel').val();
+					pValue = $(this).find('.propertyValue').val();
+					isNum = $(this).find('.propertyType').is(':checked');
+
+					if(pLabel != "" & pValue != "") // If either are empty, don't add them
+					{
+						if(isNum & !isNaN(parseFloat(pValue))) // If it's a number..
+						{
+							properties[pLabel] = parseFloat(pValue);
+						}
+						else // Store it as a string
+						{
+							properties[pLabel] = pValue;
+						}
+					}
+				}
+			);
+
+			proxyData.properties	=	JSON.stringify(properties);
+
+			/**
+			 * Determine the target and work the specifics
+			 */
+			if(type == 'node')
+			{
+				/**
+				 * Get labels (if any)
+				 */
+				var nodeLabels = new Array();
+				$('.nodeLabel').each(
+					function()
+					{
+						var workLabel = $(this).find('.labelValue').val()
+						if(workLabel != "") // Stuff breaks if you pass in a null label to the neo4j library
+						{
+							nodeLabels.push(workLabel);
+						}
+					}
+				);
+
+				proxyData.nodeLabels	=	JSON.stringify(nodeLabels);
+
+				if(action == 'new' || clone !== undefined) // For new or cloned nodes
+				{
+					saveAction	=	'addNode';
+				}
+				else
+				{
+					saveAction			=	'updateNode';
+					proxyData.id		=	data.id;
+				}
+			}
+			else // Relation
+			{
+				if(action == 'new')
+				{
+					saveAction =	'addRelation';
+					proxyData.from	=	data.from;
+					proxyData.to	=	data.to;
+					proxyData.type	=	$('#relationType').val();
+				}
+				else
+				{
+					saveAction		=	'updateRelation';
+					proxyData.id	=	data.id;
+				}
+			}
+
+			$.ajax('neo4jProxy.php?action=' + saveAction,
+				{
+					type:		'POST',
+					async:		false,
+					dataType:	'json',
+					data:		proxyData,
+					success:
+						function(returnData, textStatus, jqXHR)
+						{
+							updatedData = returnData;
+						}
+				}
+			);
+
+			data.callback(updatedData);
+			filterLabels();
+
+			if(clone === undefined) // Don't close the popup if node cloning occurs
+			{
+				clearPopup();
+			}
+		}
+
+	/**
+	 * Buttons that will be common for all types and actions
+	 */
+	var buttons =
+	[
+		{
+			text: "Add Property",
+			click: function()
+				{
+					$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td><td><input type="checkbox" class="propertyType" /></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+				}
+		},
+		{
+			text: "Save",
+			click: function(){toNeo4j();}
+		},
+		{
+			text: "Cancel",
+			click: function()
+				{
+					clearPopup();
+				}
+		}
+	];
+
+	/**
+	 * Property Elements (Common to all types and actions as well)
+	 */
+	$(actionDialog).append('<span id="propsHeader"><br />Properties<br /></span>');
+	$(actionDialog).append('<table id="propertyTable"><tr id="propColHeader"><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>');
+	$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+	$('#propertyTable').append('</table>');
+
+	/**
+	 * All Node Specific Stuff
+	 */
+	if(type == 'node')
+	{
+		buttons.unshift(
+			{
+				text: "Add Label",
+				click: function()
+					{
+						$('#propsHeader').before('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>'); // So it goes before the property header
+					}
+			}
+		);
+
+		$('#propsHeader').before('<span id="nodeLabelHeader">Node Labels<br /></span>');
+		$('#nodeLabelHeader').after('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+	}
+
+	/**
+	 * All Relation Specific Stuff
+	 */
+	if(type == 'relation')
+	{
+	}
+
+	/**
+	 * New Object Specific Stuff
+	 */
+	if(action == 'new')
+	{
+		if(type == 'node') // Generate this if node
+		{
+			title = 'Create New Node';
+		}
+		else // Generate this if relation
+		{
+			title = 'Create New Relation';
+			$('#propsHeader').before('<span id="relationHeader">Making relation from node ID ' + data.from + ' to node ID ' + data.to + '<br /><br /></span>');
+			$('#relationHeader').after('<span id="relationTypeField">Relation Type: <input type="text" id="relationType" /><br /></span>');
+		}
+	}
+
+	/**
+	 * Edit Object Specific Stuff
+	 */
+	if(action == 'edit')
+	{
+		if(type == 'node') // Generate this if node
+		{
+			title = 'Editing Node: ' + data.id;
+			var targetAction	=	'loadNode';
+			var proxyData		=	{nodeId:	data.id};
+
+			/**
+			 * Clone Button
+			 */
+			buttons.unshift(
+				{
+					text: "Clone Node",
+					click: function()
+						{
+							toNeo4j(true); // "define" the clone parameter so addNode gets run
+						}
+				}
+			);
+		}
+		else // Generate this if relation
+		{
+			title = 'Editing Relation: ' + data.id;
+			var targetAction = 'loadRelation';
+			var proxyData		=	{relationId:	data.id};
+			$(actionDialog).prepend('<span id="relationType">Relation Type: ' + htmlspecialchars(data.label) + '<br /></span>');
+		}
+
+		/**
+		 * Pull Existing Data from Neo4j in the off chance what is loaded is stale
+		 */
+		var freshData = new Object();
+
+		$.ajax('neo4jProxy.php?action=' + targetAction,
+			{
+				type:		'POST',
+				async:		false,
+				dataType:	'json',
+				data:		proxyData,
+				success:
+					function(returnData, textStatus, jqXHR)
+					{
+						freshData = returnData;
+					}
+			}
+		);
+
+		/**
+		 * Load Labels if appropriate
+		 */
+		if(freshData.neo4jLabels != null) // Null check
+		{
+			for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
+			{
+				$('#nodeLabelHeader').after('<span class="nodeLabel"><input type="text" class="labelValue" value="' + htmlspecialchars(freshData.neo4jLabels[i]) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
+			}
+		}
+
+		/**
+		 * Load Existing Properties
+		 */
+		if(Object.keys(freshData.properties).length > 0)
+		{
+			for(i = 0; i <= (Object.keys(freshData.properties).length - 1); ++i)
+			{
+				var pName = Object.keys(freshData.properties)[i];
+				var pValue = freshData.properties[pName];
+				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
+				{
+					isNum = "checked";
+				}
+				else
+				{
+					isNum = "";
+				}
+
+				$('#propColHeader').after('<tr class="property"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+			}
+		}
+	}
+
+	/**
+	 * Finish the buildout
+	 */
+	$(actionDialog).dialog("option", "buttons", buttons);
+	$(actionDialog).dialog("option", "title", title);
+}
 
 function refreshGraph()
 {
@@ -54,46 +397,6 @@ function refreshGraph()
 	graph.redraw();
 }
 
-function htmlspecialchars(str)
-{
-	if(typeof(str) == "string")
-	{
-		str = str.replace(/&/g, "&amp;"); /* must do &amp; first */
-		str = str.replace(/"/g, "&quot;");
-		str = str.replace(/'/g, "&#039;");
-		str = str.replace(/</g, "&lt;");
-		str = str.replace(/>/g, "&gt;");
-	}
-	return str;
-}
-
-function filterLabels()
-{
-	/**
-	*
-	* Get labels for filtering
-	*
-	*/
-
-	$('#labelFilter').empty(); // Clear out if previously populated
-
-	$.ajax('neo4jProxy.php?action=listLabels',
-		{
-			type: 'GET',
-			async: true,
-			dataType:	'json',
-			success:
-				function(returnData, textStatus, jqXHR)
-				{
-					for(i = 0; i <= (returnData.length - 1); ++i)
-					{
-						$('#labelFilter').append('<option value="' + htmlspecialchars(returnData[i]) + '">' + returnData[i] + '</option>');
-					}
-				}
-		}
-	);
-}
-
  /**
   *
   * End Miscellanious Functions
@@ -105,12 +408,6 @@ function filterLabels()
  * Node Related Functions
  *
  */
-
-function clearNodePopup()
-{
-	$('#nodePopup').dialog("destroy");
-	$('#nodePopup').empty();
-}
 
 function deleteNodes(nodeIds)
 {
@@ -135,242 +432,6 @@ function deleteNodes(nodeIds)
 	);
 }
 
-function nodeAction(action, nodeId, callback)
-{
-	var title;
-	var clickFunc;
-	if(action == 'new') // New node being created
-	{
-		title = 'Create New Node';
-		clickFunc = function(){data.nodes.add(nodeToNeo4j());};
-	}
-	else // Editing existing node
-	{
-		var freshData = new Object();
-		// Load data from Neo4j in the off chance that existing data is stale
-		$.ajax('neo4jProxy.php?action=loadNode',
-			{
-				type: 'POST',
-				async: false,
-				dataType:	'json',
-				data:
-					{
-						nodeId: nodeId
-					},
-				success:
-					function(returnData, textStatus, jqXHR)
-					{
-						freshData = returnData;
-					}
-			}
-		);
-
-		title = 'Editing Node: ' + freshData.id;
-
-		clickFunc = function(){callback(nodeToNeo4j(freshData.id));};
-	}
-
-	/**
-	 * Start common popup stuff
-	 */
-	var nodePopDialog = $('#nodePopup').dialog(
-		{
-			dialogClass: "no-close",
-			height: 300,
-			width: 700,
-			title: title,
-			buttons:
-			[
-				{
-					text: "Add Label",
-					click: function()
-						{
-							$('#nodePropsHeader').before('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>'); // So it goes before the property header
-						}
-				},
-				{
-					text: "Add Property",
-					click: function()
-						{
-							$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td><td><input type="checkbox" class="propertyType" /></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
-						}
-				},
-				{
-					text: "Save",
-					click: function()
-						{
-							clickFunc();
-						}
-				},
-				{
-					text: "Cancel",
-					click: function()
-						{
-							clearNodePopup();
-						}
-				}
-			]
-		}
-	);
-
-	$(nodePopDialog).append('<span id="nodeLabelHeader">Node Labels</span><br />');
-
-	/**
-	 * Labels
-	 */
-	if(action != 'new') // Node editing
-	{
-		// Add clone button
-		var existingButtons = $(nodePopDialog).dialog("option", "buttons");
-
-		var cloneButton =
-		{
-			text:	"Clone",
-			click:	function()
-				{
-					data.nodes.add(nodeToNeo4j('cloned'));
-				}
-		};
-
-		existingButtons.unshift(cloneButton);
-		$(nodePopDialog).dialog("option", "buttons", existingButtons);
-
-		// End add clone button
-
-		if(freshData.neo4jLabels != null) // Null check
-		{
-			for(i = 0; i <= (freshData.neo4jLabels.length - 1); ++i)
-			{
-				$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" value="' + htmlspecialchars(freshData.neo4jLabels[i]) + '" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-			}
-		}
-	}
-
-	$(nodePopDialog).append('<span class="nodeLabel"><input type="text" class="labelValue" /><input type="button" value="-" onclick="$(this).parent().remove();" /><br /></span>');
-
-
-	/**
-	 * Properties
-	 */
-	$(nodePopDialog).append('<span id="nodePropsHeader">Node Properties</span><br />');
-	$(nodePopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>')
-
-	if(action != 'new') // Node editing
-	{
-		if(Object.keys(freshData.properties).length > 0)
-		{
-			for(i = 0; i <= (Object.keys(freshData.properties).length - 1); ++i)
-			{
-				var pName = Object.keys(freshData.properties)[i];
-				var pValue = freshData.properties[pName];
-				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
-				{
-					isNum = "checked";
-				}
-				else
-				{
-					isNum = "";
-				}
-				$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
-			}
-		}
-	}
-
-	$('#propertyTable').append('<tr class="nodeProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
-	$('#propertyTable').append('</table>')
-}
-
-function nodeToNeo4j(nodeId)
-{
-	var updatedData = new Object();
-
-	// Get the properties
-	var nodeProperties = new Object()
-	$('.nodeProperty').each(
-		function()
-		{
-			pLabel = $(this).find('.propertyLabel').val();
-			pValue = $(this).find('.propertyValue').val();
-			isNum = $(this).find('.propertyType').is(':checked');
-
-			if(pLabel != "" & pValue != "") // If either are empty, don't add them
-			{
-				if(isNum & !isNaN(parseFloat(pValue))) // If it's a number..
-				{
-					nodeProperties[pLabel] = parseFloat(pValue);
-				}
-				else // Store it as a string
-				{
-					nodeProperties[pLabel] = pValue;
-				}
-			}
-		}
-	);
-
-	// Get the labels
-	var nodeLabels = new Array();
-	$('.nodeLabel').each(
-		function()
-		{
-			var workLabel = $(this).find('.labelValue').val()
-			if(workLabel != "") // Stuff breaks if you pass in a null label to the neo4j library
-			{
-				nodeLabels.push(workLabel);
-			}
-		}
-	);
-
-	if(nodeId !== undefined & nodeId !== 'cloned') // Update an existing node
-	{
-		$.ajax('neo4jProxy.php?action=updateNode',
-			{
-				type: 'POST',
-				async: false,
-				dataType:	'json',
-				data:
-					{
-						nodeId:	nodeId,
-						nodeProperties: JSON.stringify(nodeProperties),
-						nodeLabels:		JSON.stringify(nodeLabels)
-					},
-				success:
-					function(returnData, textStatus, jqXHR)
-					{
-						updatedData = returnData;
-					}
-			}
-		);
-	}
-	else // New or cloned node
-	{
-		$.ajax('neo4jProxy.php?action=addNode',
-			{
-				type: 'POST',
-				async: false,
-				dataType:	'json',
-				data:
-					{
-						nodeProperties: JSON.stringify(nodeProperties),
-						nodeLabels:		JSON.stringify(nodeLabels)
-					},
-				success:
-					function(returnData, textStatus, jqXHR)
-					{
-						//data.nodes.add(returnData);
-						updatedData = returnData;
-					}
-			}
-		);
-	}
-
-	if(nodeId !== 'cloned') // Close the popup since we aren't cloning
-	{
-		clearNodePopup();
-	}
-
-	filterLabels(); // Update the label listing on the chance there were new labels in use, or no longer in use
-	return updatedData;
-}
 
 /**
  *
@@ -383,12 +444,6 @@ function nodeToNeo4j(nodeId)
  * Relation Related Functions
  *
  */
-
-function clearRelationPopup()
-{
-	$('#relationPopup').dialog("destroy");
-	$('#relationPopup').empty();
-}
 
 function deleteRelations(relationIds)
 {
@@ -409,202 +464,6 @@ function deleteRelations(relationIds)
 				}
 		}
 	);
-}
-
-function relationAction(action, workingData, relationId, callback)
-{
-	var title;
-	var clickFunc;
-	if(action == 'new') // New Relation
-	{
-		title = 'Create New Relation';
-		clickFunc = function(){
-			workingData.type = $('#relationTypeField').val();
-			if(workingData.type == "")
-			{
-				alert("You must specify a relation type.");
-			}
-			else
-			{
-				data.edges.add(relationToNeo4j(workingData));
-			}
-		};
-	}
-	else // Edit Relation
-	{
-		var freshData = new Object();
-		// Load data from Neo4j in the off chance that existing data is stale
-		$.ajax('neo4jProxy.php?action=loadRelation',
-			{
-				type: 'POST',
-				async: false,
-				dataType:	'json',
-				data:
-					{
-						relationId: relationId
-					},
-				success:
-					function(returnData, textStatus, jqXHR)
-					{
-						freshData = returnData;
-					}
-			}
-		);
-
-		title = 'Editing Relation: ' + freshData.id;
-
-		clickFunc = function()
-		{
-			callback(relationToNeo4j(workingData, freshData.id));
-		}
-	}
-
-	// Common Stuff
-	var relationPopDialog = $('#relationPopup').dialog(
-		{
-			dialogClass: "no-close",
-			height: 300,
-			width: 600,
-			title: title,
-			buttons:
-			[
-				{
-					text: "Add Property",
-					click: function()
-						{
-							$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
-						}
-				},
-				{
-					text: "Save",
-					click: function()
-						{
-							clickFunc();
-						}
-				},
-				{
-					text: "Cancel",
-					click: function()
-						{
-							clearRelationPopup();
-						}
-				}
-			]
-		}
-	);
-	
-	if(action == 'new')
-	{
-		$(relationPopDialog).append('<span>Making relation from node ID ' + workingData.from + ' to node ID ' + workingData.to + '</span><br /><br />');
-	}
-
-	if(action == 'new')
-	{
-		$(relationPopDialog).append('<span id="relationType">Relation Type: <input type="text" id="relationTypeField" /></span><br /><br />');
-	}
-	else
-	{
-		$(relationPopDialog).append('<span id="relationType">Relation Type: ' + htmlspecialchars(freshData.label) + '</span><br /><br />');
-	}
-
-	$(relationPopDialog).append('<span id="relationPropsHeader">Relation Properties</span><br />');
-	$(relationPopDialog).append('<table id="propertyTable"><tr><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>');
-
-	if(action != 'new') // Relation editing
-	{
-		if(Object.keys(freshData.properties).length > 0)
-		{
-			for(i = 0; i <= (Object.keys(freshData.properties).length - 1); ++i)
-			{
-				var pName = Object.keys(freshData.properties)[i];
-				var pValue = freshData.properties[pName];
-				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
-				{
-					isNum = "checked";
-				}
-				else
-				{
-					isNum = "";
-				}
-				$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
-			}
-		}
-	}
-	$('#propertyTable').append('<tr class="relationProperty"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
-	$('#propertyTable').append('</table>')
-}
-
-function relationToNeo4j(workingData, relationId)
-{
-	var updatedData = new Object();
-
-	// Get the properties
-	var relProperties = new Object()
-	$('.relationProperty').each(
-		function()
-		{
-			pLabel = $(this).find('.propertyLabel').val();
-			pValue = $(this).find('.propertyValue').val();
-			isNum = $(this).find('.propertyType').is(':checked');
-
-			if(pLabel != "" & pValue != "") // If either are empty, don't add them
-			{
-				if(isNum & !isNaN(parseFloat(pValue))) // If it's a number..
-				{
-					relProperties[pLabel] = parseFloat(pValue);
-				}
-				else // Store it as a string
-				{
-					relProperties[pLabel] = pValue;
-				}
-			}
-		}
-	);
-
-	if(relationId === undefined) // Brand new relation
-	{
-		workingData.properties = relProperties;
-
-		$.ajax('neo4jProxy.php?action=addRelation',
-			{
-				type: 'POST',
-				async: false,
-				dataType:	'json',
-				data:
-					{
-						relationData: JSON.stringify(workingData)
-					},
-				success:
-					function(returnData, textStatus, jqXHR)
-					{
-						updatedData = returnData;
-					}
-			}
-		);
-	}
-	else // Update existing relation
-	{
-		$.ajax('neo4jProxy.php?action=updateRelation',
-			{
-				type: 'POST',
-				async: false,
-				dataType:	'json',
-				data:
-					{
-						relationId:	relationId,
-						relationProperties: JSON.stringify(relProperties)
-					},
-				success:
-					function(returnData, textStatus, jqXHR)
-					{
-						updatedData = returnData;
-					}
-			}
-		);
-	}
-
-	clearRelationPopup();
-	return updatedData;
 }
 
 /**

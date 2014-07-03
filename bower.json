@@ -9,9 +9,10 @@
   "homepage": "https://github.com/jgillmanjr/graphNav",
   "dependencies":
   {
-    "vis": "~2.0.0",
-    "jquery": "~2.1.1",
-    "jquery-ui": "~1.10.4"
+    "vis":        "~2.0.0",
+    "jquery":     "~2.1.1",
+    "jquery-ui":  "~1.10.4",
+    "select2":    "~3.5.0"
   },
   "private": true,
   "ignore": [
