@@ -197,11 +197,11 @@
 
 	if($_GET['action'] == 'addNode')
 	{
-		$nodeProperties = json_decode($_POST['nodeProperties'], TRUE);
+		$properties = json_decode($_POST['properties'], TRUE);
 		$nodeLabels = json_decode($_POST['nodeLabels'], TRUE);
 
 		$newNode = $neo4jClient->makeNode();
-		$newNode->setProperties($nodeProperties)->save();
+		$newNode->setProperties($properties)->save();
 
 		if(count($nodeLabels) > 0)
 		{
@@ -219,13 +219,16 @@
 
 	if($_GET['action'] == 'addRelation')
 	{
-		$relationData = json_decode($_POST['relationData'], TRUE);
+		$properties =	json_decode($_POST['properties'], TRUE);
+		$from	=	$_POST['from'];
+		$to		=	$_POST['to'];
+		$type	=	$_POST['type'];
 
-		$startNode = $neo4jClient->getNode($relationData['from']);
-		$endNode = $neo4jClient->getNode($relationData['to']);
+		$startNode = $neo4jClient->getNode($from);
+		$endNode = $neo4jClient->getNode($to);
 		$relation = $neo4jClient->makeRelationship();
 
-		$relation->setStartNode($startNode)->setEndNode($endNode)->setType($relationData['type'])->setProperties($relationData['properties'])->save();
+		$relation->setStartNode($startNode)->setEndNode($endNode)->setType($type)->setProperties($properties)->save();
 
 		$returnArray = genReturnData($relation);
 
@@ -289,8 +292,8 @@
 
 	if($_GET['action'] == 'updateNode')
 	{
-		$nodeId = $_POST['nodeId'];
-		$nodeProperties = json_decode($_POST['nodeProperties'], TRUE);
+		$nodeId = $_POST['id'];
+		$properties = json_decode($_POST['properties'], TRUE);
 		$nodeLabels = json_decode($_POST['nodeLabels'], TRUE);
 
 		$neo4jObject = $neo4jClient->getNode($nodeId);
@@ -310,7 +313,7 @@
 			$neo4jObject->removeLabels($neo4jObject->getLabels());
 		}
 
-		$neo4jObject->setProperties($nodeProperties)->save();
+		$neo4jObject->setProperties($properties)->save();
 
 		if(count($nodeLabels) > 0)
 		{
@@ -326,8 +329,8 @@
 
 	if($_GET['action'] == 'updateRelation')
 	{
-		$relationId = $_POST['relationId'];
-		$relationProperties = json_decode($_POST['relationProperties'], TRUE);
+		$relationId = $_POST['id'];
+		$relationProperties = json_decode($_POST['properties'], TRUE);
 
 		$neo4jObject = $neo4jClient->getRelationship($relationId);
 

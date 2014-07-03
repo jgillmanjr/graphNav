@@ -5,9 +5,7 @@
 
 // Setup graph stuff
 var container = $('#bigBoard').get(0);
-//var container = document.getElementById('bigBoard');
 
-//var data = {};
 var data =
 	{
 		nodes: new vis.DataSet(),
@@ -21,12 +19,13 @@ var options =
 		dataManipulation: true,
 		onAdd: function(data, callback)
 		{
-			 nodeAction('new');
+			data.callback	=	function(updatedData){window.data.nodes.add(updatedData);};
+			objectAction('node', 'new', data);
 		},
 		onConnect: function(data, callback)
 		{
-			//newRelation(data);
-			relationAction('new', data)
+			data.callback	=	callback;
+			objectAction('relation', 'new', data);
 		},
 		onDelete: function(data, callback)
 		{
@@ -48,11 +47,15 @@ var options =
 		},
 		onEdit: function(data, callback)
 		{
-			nodeAction('edit', data.id, callback);
+			data.callback	=	callback;
+			objectAction('node', 'edit', data);
+
 		},
 		onEditEdge: function(data, callback)
 		{
-			relationAction('edit', data, data.id, callback);
+			data.callback	=	callback;
+			data.label		=	window.data.edges._data[data.id].label;
+			objectAction('relation', 'edit', data);
 		}
 	};
 
