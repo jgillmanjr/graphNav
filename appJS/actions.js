@@ -80,6 +80,34 @@ function objectAction(type, action, data)
 	);
 
 	/**
+	 * Anonymous function to add property fields
+	 */
+	var propAddFunc = function(pName, pValue)
+		{
+			var typeOpts;
+			typeOpts = '<option value="string">String</option>';
+			typeOpts += '<option value="number">Number</option>';
+			typeOpts += '<option value="boolean">Boolean</option>';
+
+			if(pName === undefined) // I'm lazy, so I'm only doing a test against the name. I don't see how a property value could be passed in w/o name, but if there's an issue, will address..
+			{
+				var pName	=	""; // Define it as blank
+				var pValue	=	""; 
+			}
+
+			$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td><td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '"/></td><td><input type="checkbox" class="isArray" /></td><td><select class="propType">' + typeOpts + '</select></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+
+			/**
+			 * Type Checking and appropriate actions based on such
+			 */
+			if(pName !== undefined) // Only check if getting passed in property
+			{
+				var propType = typeof(pValue);
+				$('.property').last().children('td').find('.propType').val(propType);
+			}
+		}
+
+	/**
 	 * Skeleton code for making things happen in neo4j
 	 */
 	var toNeo4j	=	function(clone)
@@ -193,7 +221,7 @@ function objectAction(type, action, data)
 			text: "Add Property",
 			click: function()
 				{
-					$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td><td><input type="checkbox" class="propertyType" /></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+					propAddFunc();
 				}
 		},
 		{
@@ -213,8 +241,8 @@ function objectAction(type, action, data)
 	 * Property Elements (Common to all types and actions as well)
 	 */
 	$(actionDialog).append('<span id="propsHeader"><br />Properties<br /></span>');
-	$(actionDialog).append('<table id="propertyTable"><tr id="propColHeader"><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>');
-	$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+	$(actionDialog).append('<table id="propertyTable"><tr id="propColHeader"><th>Property Name</th><th>Property Value</th><th>Array</th><th>Type</th><th>Remove Property</th></tr>');
+	propAddFunc();
 	$('#propertyTable').append('</table>');
 
 	/**
@@ -331,16 +359,7 @@ function objectAction(type, action, data)
 			{
 				var pName = Object.keys(freshData.properties)[i];
 				var pValue = freshData.properties[pName];
-				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
-				{
-					isNum = "checked";
-				}
-				else
-				{
-					isNum = "";
-				}
-
-				$('#propColHeader').after('<tr class="property"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+				propAddFunc(pName, pValue);
 			}
 		}
 	}
