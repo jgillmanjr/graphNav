@@ -33,13 +33,16 @@ If you have any data in Neo4j, it will automatically populate (assuming graphNav
 
 For the most part, usage is pretty self explanitory. To get to the tools, hit the `Edit` button up top. From here you can create, edit, and delete nodes and relations.
 
-**Assorted Usage Notes**
+**Assorted Usage Notes and Known Issues**
 
-1. When assigning properties to nodes and relations, there will be a check box to indicate if the property value should be treated as a number. If this is checked, an attempt will be made to parse the value as a float. If it's an integer, it's not a big deal since Neo4j will get just get the integer value. If it can't parse it as a float, it will be passed in as a string.
-1. Currently it's not possible to pass in arrays for properties. This is something I need to figure out the best way of handling interface wise.
+1. When assigning properties to nodes and relations, there will be a select box to indicate if the property value should be treated as a number. If number is selected, an attempt will be made to parse the value as a float. If it's an integer, it's not a big deal since Neo4j will get just get the integer value. If it can't parse it as a float and the property is a scalar, it will be passed in as a string. However, if the property is an array, and one of the elements can't be parsed as a number, that whole property will be removed and the node will still continue to be saved. Be careful.
 1. In order to edit a relation, you will need to drag one of the ends around, whether it lands on the same node or another one it doesn't matter since the relation sticks with the same start and end nodes ultimately. This is just to get the popup to activate. If you edit a node and the relation looks wonky, just hit the `Refresh Graph` button.
 1. If the graph goes wonky due to resizing the window, for example, just hit the `Refresh Graph` button.
-1. Hit `Refresh Graph` if you want to filter by label. Multiple labels can be selected. Any nodes with the selected labels will show, as well as nodes that are directly connected to those nodes. To display all nodes again, just CTRL click (or COMMAND click if you're using a Mac... I think) to un-select things.
+1. Hit `Refresh Graph` if you want to filter by label. Multiple labels can be selected, and displayed, in a 'tag' like format.
+1. Currently, if a property is going to be an array of strings, there are a few key things to note:
+	1. Commas can't be used currently in an array value. It will signal the end of a "tag" to tag-it (how array properties are being handled interface wise). I am working on determining the best way to resolve this.
+	1. If you want to use double quotes as the first and/or last character(s) of an array value, you'll need to enter them twice, otherwise they will get tossed. If they are in the middle, however, they will be fine as is.
+	1. **THIS IS IMPORTANT** As mentioned earlier, if you specify that the values of an array are going to be numbers, the whole property will get tossed if **any** of the values can't be parsed as a number and the node will still be saved. Basically, you WILL lose the data. I am working on determining the best way to go about handling inadvertant mixed types in arrays...
 
 To Do
 -----

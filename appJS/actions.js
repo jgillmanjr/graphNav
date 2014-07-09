@@ -44,17 +44,34 @@ function filterLabels()
 	$('#labelFilter').select2({width: '150px'});
 }
 
-function htmlspecialchars(str)
+function htmlspecialchars(strData)
 {
-	if(typeof(str) == "string")
+	var charRepl = function(str)
+		{
+			if(typeof(str) == "string")
+			{
+				str = str.replace(/&/g, "&amp;"); /* must do &amp; first */
+				str = str.replace(/"/g, "&quot;");
+				str = str.replace(/'/g, "&#039;");
+				str = str.replace(/</g, "&lt;");
+				str = str.replace(/>/g, "&gt;");
+			}
+			return str;
+		};
+
+	if(Array.isArray(strData)) // If this is an array...
 	{
-		str = str.replace(/&/g, "&amp;"); /* must do &amp; first */
-		str = str.replace(/"/g, "&quot;");
-		str = str.replace(/'/g, "&#039;");
-		str = str.replace(/</g, "&lt;");
-		str = str.replace(/>/g, "&gt;");
+		for(j = 0; j <= (strData.length - 1); ++j)
+		{
+			strData[j] = charRepl(strData[j]);
+		}
 	}
-	return str;
+	else // Scalar
+	{
+		strData = charRepl(strData);
+	}
+	
+	return strData;
 }
 
 /**
@@ -75,9 +92,64 @@ function objectAction(type, action, data)
 		{
 			dialogClass:	"no-close",
 			height:			400,
-			width:			700
+			width:			900
 		}
 	);
+
+	/**
+	 * Anonymous function to add property fields
+	 */
+	var propAddFunc = function(pName, pValue)
+		{
+			/**
+			 * Clean up right from the front
+			 */
+			pName	= htmlspecialchars(pName);
+			pValue	= htmlspecialchars(pValue);
+
+			var typeOpts;
+			typeOpts = '<option value="string">String</option>';
+			typeOpts += '<option value="number">Number</option>';
+			//typeOpts += '<option value="boolean">Boolean</option>'; // Commented out until I figure out how I want to handle boolean inputs...
+
+			if(pName === undefined) // I'm lazy, so I'm only doing a test against the name. I don't see how a property value could be passed in w/o name, but if there's an issue, will address..
+			{
+				var pName	=	""; // Define it as blank
+				var pValue	=	""; 
+			}
+			var propertyRowInsert = '<tr class="property"><td><input type="text" class="propertyLabel" value="' + pName + '" /></td><td><input type="text" class="propertyValue" value="' + pValue + '"/></td><td><input type="checkbox" class="isArray" /></td><td><select class="pType">' + typeOpts + '</select></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>';
+			
+			if(pName == "") // Insert new property rows at the top
+			{
+				$('#propColHeader').after(propertyRowInsert);
+			}
+			else
+			{
+				$('#propertyTable').append(propertyRowInsert);
+			}
+
+			/**
+			 * Type Checking and appropriate actions based on such
+			 */
+			if(Array.isArray(pValue))
+			{
+				var tagitOpts =
+				{
+					allowSpaces:		true,
+					allowDuplicates:	true
+				};
+				$('.property').last().children('td').find('.propertyValue').tagit(tagitOpts);
+				$('.property').last().children('td').find('.isArray').prop('checked', true);
+
+				var pType =	typeof(pValue[1]); // Just check the first value for the time being and base off that. If this proves to be an issue, I can adjust fire later.
+			}
+			else
+			{
+				var pType = typeof(pValue);
+				$('.property').last().children('td').find('.pType').val(pType);
+			}
+			$('.property').last().children('td').find('.pType').val(pType);
+		};
 
 	/**
 	 * Skeleton code for making things happen in neo4j
@@ -93,24 +165,59 @@ function objectAction(type, action, data)
 			$('.property').each(
 				function()
 				{
-					pLabel = $(this).find('.propertyLabel').val();
-					pValue = $(this).find('.propertyValue').val();
-					isNum = $(this).find('.propertyType').is(':checked');
+					var isArray	=	$(this).find('.isArray').is(':checked'); // Check if indicated as being an array
+					var pLabel	=	$(this).find('.propertyLabel').val();
 
+					if(isArray)
+					{
+						var pValue	=	$(this).find('input.propertyValue').tagit('assignedTags');
+					}
+					else
+					{
+						var pValue	=	$(this).find('input.propertyValue').val();
+					}
+					
 					if(pLabel != "" & pValue != "") // If either are empty, don't add them
 					{
-						if(isNum & !isNaN(parseFloat(pValue))) // If it's a number..
+						
+						var pType	=	$(this).find('.pType').val(); // What does the user think the type should be?
+
+						if(isArray & Array.isArray(pValue)) // Verify it's actually an array of values..
 						{
-							properties[pLabel] = parseFloat(pValue);
+							var tempArray = new Array();
+							for(i = 0; i <= (pValue.length - 1); ++i)
+							{
+								if(pType == 'number' & isNaN(parseFloat(pValue[i]))) // Throw a flag on the play if indicated that the values should be numbers, but they actually aren't...
+								{
+									alert(pValue[i] + ' is not a number, however you have specified that it should be. Dropping the entire property, as Neo4j will not like it.'); // Yeah, I'm lazy like that...
+									return;
+								}
+								else if(pType == 'number')
+								{
+									tempArray.push(parseFloat(pValue[i]));
+								}
+								else
+								{
+									tempArray.push(pValue[i]);
+								}
+							}
+							properties[pLabel]	=	tempArray; // This is so that number parsing (and later, boolean parsing) can happen
 						}
-						else // Store it as a string
+						else // Scalar
 						{
-							properties[pLabel] = pValue;
-						}
+							if(pType == 'number' & !isNaN(parseFloat(pValue))) // If it can actually be parsed as a number..
+							{
+								properties[pLabel] = parseFloat(pValue);
+							}
+							else // Store it as a string
+							{
+								properties[pLabel] = pValue;
+							}
+						}		
 					}
 				}
 			);
-
+			//console.log(proxyData); // Debugging
 			proxyData.properties	=	JSON.stringify(properties);
 
 			/**
@@ -182,7 +289,7 @@ function objectAction(type, action, data)
 			{
 				clearPopup();
 			}
-		}
+		};
 
 	/**
 	 * Buttons that will be common for all types and actions
@@ -193,7 +300,7 @@ function objectAction(type, action, data)
 			text: "Add Property",
 			click: function()
 				{
-					$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td><td><input type="checkbox" class="propertyType" /></td><td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+					propAddFunc();
 				}
 		},
 		{
@@ -209,13 +316,17 @@ function objectAction(type, action, data)
 		}
 	];
 
+	
+
 	/**
 	 * Property Elements (Common to all types and actions as well)
 	 */
 	$(actionDialog).append('<span id="propsHeader"><br />Properties<br /></span>');
-	$(actionDialog).append('<table id="propertyTable"><tr id="propColHeader"><th>Property Name</th><th>Property Value</th><th>Number</th><th>Remove Property</th></tr>');
-	$('#propertyTable').append('<tr class="property"><td><input type="text" class="propertyLabel" /></td> <td><input type="text" class="propertyValue" /></td> <td><input type="checkbox" class="propertyType" /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+	$(actionDialog).append('<table id="propertyTable"><col id="pNameCol" /><col id="pValCol" /><col id="isArrayCol" /><col id="pTypeCol" /><col id="remPropCol" /><tr id="propColHeader"><th>Property Name</th><th>Property Value</th><th>Array</th><th>Type</th><th>Rem.</th></tr>');
+	propAddFunc();
 	$('#propertyTable').append('</table>');
+
+	
 
 	/**
 	 * All Node Specific Stuff
@@ -331,19 +442,35 @@ function objectAction(type, action, data)
 			{
 				var pName = Object.keys(freshData.properties)[i];
 				var pValue = freshData.properties[pName];
-				if(typeof(pValue) == "number") // Determine if a number or string, and subsequently set the number box as checked or not.
-				{
-					isNum = "checked";
-				}
-				else
-				{
-					isNum = "";
-				}
-
-				$('#propColHeader').after('<tr class="property"><td><input type="text" class="propertyLabel" value="' + htmlspecialchars(pName) + '" /></td> <td><input type="text" class="propertyValue" value="' + htmlspecialchars(pValue) + '" /></td> <td><input type="checkbox" class="propertyType" ' + isNum + ' /></td> <td><input type="button" value="-" onclick="$(this).parent().parent().remove();" /></td></tr>');
+				propAddFunc(pName, pValue);
 			}
 		}
 	}
+
+	/**
+	 * Setup the trigger to change the property value field to handle arrays when the checkbox is selected, then the reverse when unchecked now that they should all be there..
+	 */
+	$('#propertyTable').on('change', '.isArray',
+		function()
+		{
+			var tagitOpts =
+				{
+					allowSpaces:		true,
+					allowDuplicates:	true
+				};
+
+			var sibPvalue = $(this).parent().parent().find('.propertyValue');
+
+			if(sibPvalue.hasClass('tagit-hidden-field')) // Destroy the tagit widget
+			{
+				sibPvalue.tagit('destroy');
+			}
+			else // Enable
+			{
+				sibPvalue.tagit(tagitOpts);
+			}
+		}
+	);
 
 	/**
 	 * Finish the buildout

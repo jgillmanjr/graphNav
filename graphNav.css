@@ -16,6 +16,33 @@
 	width:	100%;
 }
 
+/* Property Columns CSS */
+#pNameCol
+{
+	width:	20%;
+}
+
+#pValCol
+{
+	width:	65%;
+}
+
+#isArrayCol
+{
+	width:	5%;
+}
+
+#pTypeCol
+{
+	width:	5%;
+}
+
+#remPropCol
+{
+	width:	5%;
+}
+/* End Column CSS */
+
 .graph-frame
 {
 	outline-style:	dashed;
@@ -28,12 +55,12 @@
 
 .propertyLabel
 {
-	width:	150px;
+	width:	100%;
 }
 
 .propertyValue
 {
-	width:	150px;
+	width:	80%;
 }
 
 .organizer
