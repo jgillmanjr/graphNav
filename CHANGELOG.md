@@ -1,5 +1,20 @@
 Changelog
 =========
+## Version 0.5.0
+
+### New Capabilities
+1. Arrays of string and number types can be used (remember, no mixing of types, at least for now, as per the [Neo4j documentation](http://docs.neo4j.org/chunked/stable/rest-api-property-values.html#_arrays))
+
+### Fixes / Tweaks
+1. Refactoring of how property fields are generated. Same code is now used as part of existing property generation
+1. Additionally created property fields added to top now
+1. Updated documentation
+
+### To Do
+1. Boolean support. I'm deciding the best way to handle this..
+
+-----------------------------------
+
 ## Version 0.4.1
 
 ### Fixes / Tweaks

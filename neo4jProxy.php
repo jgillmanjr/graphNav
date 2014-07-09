@@ -30,7 +30,18 @@
 			{
 				foreach($neo4jObject->getProperties() as $property => $value)
 				{
-					$title .= "<b>$property:</b> $value <br />";
+					if(is_array($value))
+					{
+						$title .= "<b>$property:</b><br />";
+						foreach($value as $subvalue)
+						{
+							$title .= "&emsp14; &gtrdot;$subvalue<br />";
+						}
+					}
+					else
+					{
+						$title .= "<b>$property:</b>&emsp14; $value <br />";
+					}
 				}
 			}
 		}
@@ -45,7 +56,18 @@
 			{
 				foreach($neo4jObject->getProperties() as $property => $value)
 				{
-					$title .= "<b>$property:</b> $value <br />";
+					if(is_array($value))
+					{
+						$title .= "<b>$property:</b><br />";
+						foreach($value as $subvalue)
+						{
+							$title .= "&emsp14; &gtrdot;$subvalue<br />";
+						}
+					}
+					else
+					{
+						$title .= "<b>$property:</b>&emsp14; $value <br />";
+					}
 				}
 			}
 		}
