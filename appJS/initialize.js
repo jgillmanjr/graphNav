@@ -80,4 +80,21 @@ $.ajax('neo4jProxy.php?action=retrieveAll',
 
 filterLabels();
 
-var graph = new vis.Graph(container, data, options);
+/**
+ * Setup trigger for freezing the simulation
+ */
+$('#togglePhysics').on('click',
+		function()
+		{
+			if(graph.freezeSimulation)
+			{
+				graph.freezeSimulation = false;
+			}
+			else // Enable
+			{
+				graph.freezeSimulation = true;
+			}
+		}
+	);
+
+var graph = new vis.Network(container, data, options);

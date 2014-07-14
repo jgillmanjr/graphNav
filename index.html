@@ -17,11 +17,13 @@
 	</head>
 	<body>
 		<div class="organizer">
-			<input type="button" value="Refresh Graph" onclick="refreshGraph();" /><br />
-			
+			<input type="button" id="togglePhysics" value="Toggle Physics"/><br /> <br />
+
 			Filter by labels<br />
 			<select id="labelFilter" multiple size="10">
-			</select>
+			</select><br />
+
+			<input type="button" value="Refresh Graph" onclick="refreshGraph();" />
 		</div>
 
 		<div class="organizer" id="bigBoard"></div>
