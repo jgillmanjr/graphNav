@@ -1,5 +1,19 @@
 Changelog
 =========
+## Version 0.6.0
+
+## New Capabilities
+1. Can now freeze the physics simulation. Good for positioning those nodes exactly where you want them. Note that the links may not work out exactly like you may want though. Some actions, such as enabling editing features, will turn the simulation modeling back on. Not superdependable.
+
+### Fixes / Tweaks
+1. Updates to account for some changes made in the 3.0.0 release of the vis.js library. The `Graph` class has been renamed to `Network`
+1. `Refresh Graph` button moved to the end
+
+### To Do
+1. Boolean support. I'm deciding the best way to handle this..
+
+-----------------------------------
+
 ## Version 0.5.0
 
 ### New Capabilities
